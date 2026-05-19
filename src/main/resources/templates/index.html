@@ -53,8 +53,7 @@
     <select id="theme-selector">
       <option value="">-- 테마를 선택하세요 --</option>
     </select>
-    <div style="margin-top: 20px;">
-      <a href="/my-reservations" style="text-decoration: none; color: #007bff; font-weight: bold;">[내 예약 확인하기]</a>
+    <div id="auth-links" style="margin-top: 20px;">
     </div>
   </div>
 
@@ -69,6 +68,25 @@
   document.addEventListener('DOMContentLoaded', () => {
     const selector = document.getElementById('theme-selector');
     const popularList = document.getElementById('popular-list');
+    const authLinks = document.getElementById('auth-links');
+
+    // 로그인 상태 확인 및 링크 렌더링
+    const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+    if (token) {
+      authLinks.innerHTML = `
+        <a href="/my-reservations" style="text-decoration: none; color: #007bff; font-weight: bold; margin-right: 15px;">[내 예약 확인하기]</a>
+        <a href="#" id="logout-link" style="text-decoration: none; color: #dc3545; font-weight: bold;">[로그아웃]</a>
+      `;
+      document.getElementById('logout-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        location.reload();
+      });
+    } else {
+      authLinks.innerHTML = `
+        <a href="/login" style="text-decoration: none; color: #28a745; font-weight: bold;">[로그인]</a>
+      `;
+    }
 
     // 1. 전체 테마 목록 조회
     fetch('/themes')

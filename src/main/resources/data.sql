@@ -1,3 +1,7 @@
+-- 0. 회원 데이터
+INSERT INTO member (id, login_id, name, password)
+VALUES (1, 'sample@sample.com', '루드비코', 'samplePassword');
+
 -- 1. 테마 데이터 (총 12개)
 INSERT INTO theme (name, description, image_url, running_time)
 VALUES

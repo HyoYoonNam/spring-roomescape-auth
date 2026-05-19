@@ -7,11 +7,19 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.exception.AuthorizationException;
 import roomescape.exception.BusinessException;
 
 @RestControllerAdvice
 @Priority(1)
 public class BusinessExceptionHandler {
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<ProblemDetail> handleAuthorizationException(AuthorizationException ex) {
+        return ResponseEntity
+                .status(ex.getStatusCode())
+                .body(ex.getBody());
+    }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ProblemDetail> handleBusinessException(BusinessException ex) {

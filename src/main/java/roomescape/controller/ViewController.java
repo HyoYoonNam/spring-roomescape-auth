@@ -15,4 +15,9 @@ public class ViewController {
     public String myReservationPage() {
         return "my-reservation";
     }
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "login";
+    }
 }
