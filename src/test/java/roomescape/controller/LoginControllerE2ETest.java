@@ -78,7 +78,6 @@ class LoginControllerE2ETest {
                     1, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD
             );
 
-            // 로그인
             String accessToken = RestAssured
                     .given().log().all()
                     .body(new TokenRequestDto(SAMPLE_LOGIN_ID, SAMPLE_PASSWORD))
@@ -87,7 +86,6 @@ class LoginControllerE2ETest {
                     .when().post("/login")
                     .then().log().all().extract().as(TokenResponseDto.class).accessToken();
 
-            // 로그인 시 받은 토큰을 담아 요청
             MemberResponse member = RestAssured
                     .given().log().all()
                     .header("Authorization", "Bearer " + accessToken)
@@ -97,6 +95,27 @@ class LoginControllerE2ETest {
                     .statusCode(HttpStatus.OK.value()).extract().as(MemberResponse.class);
 
             assertThat(member.name()).isEqualTo(SAMPLE_NAME);
+        }
+
+        @DisplayName("토큰 없이 내 정보를 조회하면 401 Unauthorized를 응답한다")
+        @Test
+        void 토큰없이_내정보를_조회하면_401을_응답한다() {
+            RestAssured
+                    .given().log().all()
+                    .when().get("/members/me")
+                    .then().log().all()
+                    .statusCode(401);
+        }
+
+        @DisplayName("유효하지 않은 토큰으로 내 정보를 조회하면 401 Unauthorized를 응답한다")
+        @Test
+        void 유효하지_않은_토큰으로_내_정보를_조회하면_401을_응답한다() {
+            RestAssured
+                    .given().log().all()
+                    .header("Authorization", "Bearer invalid-token-here")
+                    .when().get("/members/me")
+                    .then().log().all()
+                    .statusCode(401);
         }
     }
 }

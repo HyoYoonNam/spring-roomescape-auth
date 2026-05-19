@@ -8,7 +8,6 @@ import io.restassured.response.Response;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,16 +34,77 @@ class ReservationControllerE2ETest {
     private String getAccessToken() {
         if (accessToken != null) return accessToken;
 
-        // Ensure member exists
-        // This is tricky because @Sql runs per test method.
-        // I'll manually insert member if needed or assume it's there from @Sql.
-        
         accessToken = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(new TokenRequestDto("sample@sample.com", "samplePassword"))
                 .when().post("/login")
                 .then().extract().as(TokenResponseDto.class).accessToken();
         return accessToken;
+    }
+
+    @Nested
+    class 인증_실패_케이스 {
+
+        @DisplayName("토큰 없이 예약을 조회하면 401 Unauthorized를 응답한다")
+        @Test
+        void 토큰없이_예약울_조회하면_401을_응답한다() {
+            RestAssured.given().log().all()
+                    .when().get("/api/reservations")
+                    .then().log().all()
+                    .statusCode(401);
+        }
+
+        @DisplayName("토큰 없이 예약을 생성하면 401 Unauthorized를 응답한다")
+        @Test
+        void 토큰없이_예약을_생성하면_401을_응답한다() {
+            Map<String, Object> requestBody = Map.of(
+                    "date", FUTURE_DATE,
+                    "timeId", 1,
+                    "themeId", 1
+            );
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(requestBody)
+                    .when().post("/api/reservations")
+                    .then().log().all()
+                    .statusCode(401);
+        }
+
+        @DisplayName("토큰 없이 예약을 변경하면 401 Unauthorized를 응답한다")
+        @Test
+        void 토큰없이_예약을_변경하면_401을_응답한다() {
+            Map<String, Object> requestBody = Map.of(
+                    "date", FUTURE_DATE,
+                    "timeId", 1
+            );
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(requestBody)
+                    .when().patch("/api/reservations/1")
+                    .then().log().all()
+                    .statusCode(401);
+        }
+
+        @DisplayName("토큰 없이 예약을 취소하면 401 Unauthorized를 응답한다")
+        @Test
+        void 토큰없이_예약을_취소하면_401을_응답한다() {
+            RestAssured.given().log().all()
+                    .when().delete("/api/reservations")
+                    .then().log().all()
+                    .statusCode(401);
+        }
+
+        @DisplayName("유효하지 않은 토큰으로 요청하면 401 Unauthorized를 응답한다")
+        @Test
+        void 유효하지_않은_토큰으로_요청하면_401을_응답한다() {
+            RestAssured.given().log().all()
+                    .header("Authorization", "Bearer invalid-token-here")
+                    .when().get("/api/reservations")
+                    .then().log().all()
+                    .statusCode(401);
+        }
     }
 
     @Nested
@@ -121,7 +181,7 @@ class ReservationControllerE2ETest {
         void JSON_본문의_필드_타입이_일치하지_않으면_400을_응답한다() {
             Map<String, Object> requestBodyWithTypeMismatch = Map.of(
                     "date", FUTURE_DATE,
-                    "timeId", "not-a-number", // String instead of Long
+                    "timeId", "not-a-number",
                     "themeId", 1
             );
 
@@ -203,7 +263,7 @@ class ReservationControllerE2ETest {
                     .when().get("/api/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(6)); // 루드비코의 예약 개수 (data.sql 업데이트 됨)
+                    .body("size()", is(6));
         }
 
     }
