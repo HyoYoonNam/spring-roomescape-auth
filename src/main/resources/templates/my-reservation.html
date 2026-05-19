@@ -169,6 +169,20 @@
   let currentEditingId = null;
   let allTimes = [];
 
+  function getAuthToken() {
+    const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
+    return match ? match[2] : null;
+  }
+
+  function getAuthHeaders() {
+    const token = getAuthToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     // 0. 모든 시간 목록 미리 로드 (수정용)
     fetch('/times')
@@ -198,7 +212,9 @@
     const username = document.getElementById('username-input').value;
     if (!username) return alert('이름을 입력해주세요.');
 
-    fetch(`/api/reservations?username=${username}`)
+    fetch(`/api/reservations?username=${username}`, {
+      headers: getAuthHeaders()
+    })
     .then(async res => {
       if (res.ok) {
         return res.json();
@@ -239,7 +255,10 @@
       themeId: themeId
     });
 
-    fetch(`/api/reservations?${params.toString()}`, { method: 'DELETE' })
+    fetch(`/api/reservations?${params.toString()}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    })
     .then(async res => {
       if (res.ok) {
         alert('취소되었습니다.');
@@ -282,7 +301,7 @@
 
     fetch(`/api/reservations/${currentEditingId}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({ date: newDate, timeId: parseInt(newTimeId) })
     })
     .then(async res => {

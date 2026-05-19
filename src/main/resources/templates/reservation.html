@@ -141,6 +141,20 @@
   let selectedTimeId = null;
   let allTimes = [];
 
+  function getAuthToken() {
+    const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
+    return match ? match[2] : null;
+  }
+
+  function getAuthHeaders() {
+    const token = getAuthToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const themeId = params.get('themeId');
@@ -253,7 +267,7 @@
 
       fetch('/api/reservations', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ themeId: parseInt(themeId), name, date, timeId: selectedTimeId })
       })
       .then(async res => {

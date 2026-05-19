@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import roomescape.exception.AuthorizationException;
 
 @Component
 public class JwtTokenProvider {
@@ -50,7 +51,7 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
-    private void validateToken(String token) {
+    public void validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
@@ -59,7 +60,7 @@ public class JwtTokenProvider {
 
             claims.getBody().getExpiration();
         } catch (JwtException | IllegalArgumentException e) {
-            throw new RuntimeException("Invalid token");
+            throw new AuthorizationException();
         }
     }
 }

@@ -27,6 +27,14 @@ class BusinessExceptionHandlerTest {
     @MockitoBean
     private TestController testController;
 
+    @MockitoBean
+    private roomescape.infreastructure.LoginInterceptor loginInterceptor;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() throws Exception {
+        org.mockito.Mockito.when(loginInterceptor.preHandle(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(true);
+    }
+
     @Nested
     class 예외를_409_Conflict로_변환한다 {
 

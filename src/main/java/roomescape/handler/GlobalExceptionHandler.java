@@ -30,6 +30,21 @@ public class GlobalExceptionHandler {
                 .body(problemDetail);
     }
 
+    @ExceptionHandler(roomescape.exception.AuthorizationException.class)
+    public ResponseEntity<ProblemDetail> handleAuthorizationException(roomescape.exception.AuthorizationException e) {
+        log.error("인증 실패: ", e);
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNAUTHORIZED,
+                e.getMessage()
+        );
+        problemDetail.setTitle("인증 실패");
+
+        return ResponseEntity
+                .status(problemDetail.getStatus())
+                .body(problemDetail);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleException(Exception e) {
         log.error("예상치 못한 예외 발생: ", e);

@@ -10,6 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.infreastructure.LoginInterceptor;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @WebMvcTest(GlobalExceptionHandler.class)
 class GlobalExceptionHandlerTest {
@@ -19,6 +23,14 @@ class GlobalExceptionHandlerTest {
 
     @MockitoBean
     private TestController testController;
+
+    @MockitoBean
+    private LoginInterceptor loginInterceptor;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() throws Exception {
+        when(loginInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+    }
 
     @DisplayName("IllegalArgumentException이 발생하면 400 Bad Request로 변환하여 응답한다")
     @Test

@@ -267,6 +267,7 @@ class ReservationControllerE2ETest {
             );
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAccessToken())
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().patch("api/reservations/" + 24L)
@@ -284,6 +285,7 @@ class ReservationControllerE2ETest {
             );
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAccessToken())
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().patch("api/reservations/" + 23L)
@@ -301,6 +303,7 @@ class ReservationControllerE2ETest {
             );
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAccessToken())
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().patch("api/reservations/" + 23L)
@@ -318,6 +321,7 @@ class ReservationControllerE2ETest {
             );
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAccessToken())
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().patch("api/reservations/" + 23L)

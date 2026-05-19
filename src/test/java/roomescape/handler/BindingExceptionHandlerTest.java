@@ -10,13 +10,26 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.infreastructure.LoginInterceptor;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @WebMvcTest({BindingExceptionHandler.class, TestController.class})
 class BindingExceptionHandlerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private LoginInterceptor loginInterceptor;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() throws Exception {
+        when(loginInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+    }
 
     @DisplayName("필수 쿼리 파라미터가 누락되면 400 Bad Request를 응답한다")
     @Test
