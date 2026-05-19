@@ -6,17 +6,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.Member;
 import roomescape.dto.ReservationRequestDTO;
-import roomescape.dto.ReservationResponseDTO;
+import roomescape.dto.ReservationResponseDto;
 import roomescape.dto.ReservationUpdateDtoDateAndTimeIdOnly;
 import roomescape.exception.DuplicatedReservationException;
 import roomescape.exception.PastDateReservationException;
@@ -24,12 +23,14 @@ import roomescape.exception.PastDateCancellationException;
 import roomescape.exception.PastDateModificationException;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
+import roomescape.repository.JdbcMemberRepository;
 import roomescape.repository.JdbcReservationRepository;
 import roomescape.repository.JdbcReservationTimeRepository;
 import roomescape.repository.JdbcThemeRepository;
+import roomescape.repository.MemberRepository;
 
 @JdbcTest
-@Import({JdbcReservationRepository.class, JdbcReservationTimeRepository.class, JdbcThemeRepository.class,
+@Import({JdbcReservationRepository.class, JdbcReservationTimeRepository.class, JdbcThemeRepository.class, JdbcMemberRepository.class,
         ReservationService.class})
 @Sql(value = "/initialize_theme_and_time.sql")
 class ReservationServiceTest {
@@ -37,53 +38,38 @@ class ReservationServiceTest {
     @Autowired
     ReservationService reservationService;
 
+    @Autowired
+    MemberRepository memberRepository;
+
+    private Member getMember() {
+        return memberRepository.findById(1L).orElseThrow();
+    }
+
     @DisplayName("예약을 생성한다")
     @Test
     void ReservationRequestDTO를_받아_ReservationResponseDTO를_리턴한다() {
         ReservationRequestDTO reservationRequestDTO = new ReservationRequestDTO(
-                "루드비코", LocalDate.now().plusDays(1), 1L, 1L
+                LocalDate.now().plusDays(1), 1L, 1L
         );
 
-        ReservationResponseDTO addedReservation = reservationService.reserve(reservationRequestDTO);
+        ReservationResponseDto addedReservation = reservationService.reserve(getMember(), reservationRequestDTO);
 
-        assertThat(addedReservation)
-                .extracting(responseDTO -> new ReservationRequestDTO(
-                        responseDTO.name(),
-                        responseDTO.date(),
-                        responseDTO.time().id(),
-                        responseDTO.theme().id()
-                ))
-                .isEqualTo(reservationRequestDTO);
+        assertThat(addedReservation.date()).isEqualTo(reservationRequestDTO.date());
+        assertThat(addedReservation.time().id()).isEqualTo(reservationRequestDTO.timeId());
+        assertThat(addedReservation.theme().id()).isEqualTo(reservationRequestDTO.themeId());
     }
 
     @DisplayName("지나간 날짜/시간에 대한 예약은 거부한다")
     @Test
     void 지나간_시점에_대한_예약_요청에는_PastDateReservationException_예외를_던진다() {
         ReservationRequestDTO outdatedRequest = new ReservationRequestDTO(
-                "sample",
                 LocalDate.now().minusDays(1),
                 1L,
                 1L
         );
 
-        assertThatThrownBy(() -> reservationService.reserve(outdatedRequest))
+        assertThatThrownBy(() -> reservationService.reserve(getMember(), outdatedRequest))
                 .isExactlyInstanceOf(PastDateReservationException.class);
-    }
-
-    @DisplayName("비어 있는 이름에 대한 예약은 거부한다")
-    @ParameterizedTest(name = "이름이 {0}이면 예외를 던진다")
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "  "})
-    void 이름이_비어_있는_요청에는_IllegalArgumentException_예외를_던진다(String emptyName) {
-        ReservationRequestDTO emptyNameRequest = new ReservationRequestDTO(
-                emptyName,
-                LocalDate.now().plusDays(1),
-                1L,
-                1L
-        );
-
-        assertThatThrownBy(() -> reservationService.reserve(emptyNameRequest))
-                .isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("중복된 예약은 거부한다")
@@ -94,13 +80,13 @@ class ReservationServiceTest {
         long timeId = 1L;
         long themeId = 1L;
         ReservationRequestDTO reservationRequestDTO = new ReservationRequestDTO(
-                "루드비코", date, timeId, themeId
+                date, timeId, themeId
         );
-        reservationService.reserve(reservationRequestDTO);
+        reservationService.reserve(getMember(), reservationRequestDTO);
 
         // when and then
-        ReservationRequestDTO duplicatedRequestDto = new ReservationRequestDTO("에코", date, timeId, themeId);
-        assertThatThrownBy(() -> reservationService.reserve(duplicatedRequestDto))
+        ReservationRequestDTO duplicatedRequestDto = new ReservationRequestDTO(date, timeId, themeId);
+        assertThatThrownBy(() -> reservationService.reserve(getMember(), duplicatedRequestDto))
                 .isExactlyInstanceOf(DuplicatedReservationException.class);
     }
 
@@ -109,15 +95,15 @@ class ReservationServiceTest {
     void 존재하는_모든_예약의_ReservationResponseDTO가_담긴_리스트를_리턴한다() {
         // given
         ReservationRequestDTO rudevicoReservationRequestDTO =
-                new ReservationRequestDTO("루드비코", LocalDate.now().plusDays(1), 1L, 1L);
+                new ReservationRequestDTO(LocalDate.now().plusDays(1), 1L, 1L);
         ReservationRequestDTO echoReservationRequestDTO =
-                new ReservationRequestDTO("에코", LocalDate.now().plusDays(1), 2L, 1L);
+                new ReservationRequestDTO(LocalDate.now().plusDays(1), 2L, 1L);
 
-        ReservationResponseDTO rudevicoReservation = reservationService.reserve(rudevicoReservationRequestDTO);
-        ReservationResponseDTO echoReservation = reservationService.reserve(echoReservationRequestDTO);
+        ReservationResponseDto rudevicoReservation = reservationService.reserve(getMember(), rudevicoReservationRequestDTO);
+        ReservationResponseDto echoReservation = reservationService.reserve(getMember(), echoReservationRequestDTO);
 
         // when
-        List<ReservationResponseDTO> allReservations = reservationService.readAllReservation();
+        List<ReservationResponseDto> allReservations = reservationService.readAllReservation();
 
         // then
         assertThat(allReservations)
@@ -130,13 +116,13 @@ class ReservationServiceTest {
     void 사용자_이름과_날짜와_시간과_테마가_일치하는_예약을_취소한다() {
         // given
         ReservationRequestDTO reservationRequestDTO = new ReservationRequestDTO(
-                "루드비코", LocalDate.now().plusDays(1), 1L, 1L
+                LocalDate.now().plusDays(1), 1L, 1L
         );
 
-        ReservationResponseDTO addedReservation = reservationService.reserve(reservationRequestDTO);
+        ReservationResponseDto addedReservation = reservationService.reserve(getMember(), reservationRequestDTO);
 
         // when
-        reservationService.cancelReservation(reservationRequestDTO);
+        reservationService.cancelReservation(getMember(), reservationRequestDTO);
 
         // then
         assertThatThrownBy(() -> reservationService.findById(addedReservation.id()))
@@ -149,8 +135,8 @@ class ReservationServiceTest {
     void 과거_시점의_예약을_취소하면_PastDateCancellationException을_던진다() {
         // when and then
         assertThatThrownBy(() -> reservationService.cancelReservation(
+                getMember(),
                 new ReservationRequestDTO(
-                        "루드비코",
                         LocalDate.now().minusDays(7),
                         1L,
                         1L
@@ -164,8 +150,8 @@ class ReservationServiceTest {
     void 존재하지_않는_예약을_취소하면_ReservationNotFoundException을_던진다() {
         // when and then
         assertThatThrownBy(() -> reservationService.cancelReservation(
+                getMember(),
                 new ReservationRequestDTO(
-                        "루드비코",
                         LocalDate.now().plusDays(7),
                         1L,
                         1L
@@ -173,31 +159,22 @@ class ReservationServiceTest {
         )).isExactlyInstanceOf(ReservationNotFoundException.class);
     }
 
-    @DisplayName("사용자 이름으로 예약을 조회한다")
+    @DisplayName("회원 정보로 예약을 조회한다")
     @Test
-    void 사용자_이름이_일치하는_모든_예약의_ReservationResponseDTO가_담긴_리스트를_리턴한다() {
+    void 회원이_일치하는_모든_예약의_ReservationResponseDTO가_담긴_리스트를_리턴한다() {
         // given
         ReservationRequestDTO rudevicoReservationRequestDTO =
-                new ReservationRequestDTO("루드비코", LocalDate.now().plusDays(1), 1L, 1L);
+                new ReservationRequestDTO(LocalDate.now().plusDays(1), 1L, 1L);
         ReservationRequestDTO echoReservationRequestDTO =
-                new ReservationRequestDTO("에코", LocalDate.now().plusDays(1), 2L, 1L);
+                new ReservationRequestDTO(LocalDate.now().plusDays(1), 2L, 1L);
 
-        ReservationResponseDTO rudevicoReservation = reservationService.reserve(rudevicoReservationRequestDTO);
-        ReservationResponseDTO echoReservation = reservationService.reserve(echoReservationRequestDTO);
+        ReservationResponseDto rudevicoReservation = reservationService.reserve(getMember(), rudevicoReservationRequestDTO);
+        ReservationResponseDto echoReservation = reservationService.reserve(getMember(), echoReservationRequestDTO);
 
         // when and then
-        assertThat(reservationService.findAllByUsername("루드비코"))
-                .hasSize(1)
-                .containsExactlyInAnyOrder(rudevicoReservation);
-    }
-
-    @DisplayName("비어 있는 이름으로 예약 조회 시 예외를 던진다")
-    @ParameterizedTest(name = "이름이 {0}이면 예외를 던진다")
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "  "})
-    void 비어_있는_이름으로_예약_조회_시_IllegalArgumentException_예외를_던진다(String invalidName) {
-        assertThatThrownBy(() -> reservationService.findAllByUsername(invalidName))
-                .isExactlyInstanceOf(IllegalArgumentException.class);
+        assertThat(reservationService.findAllByMember(getMember()))
+                .hasSize(2)
+                .containsExactlyInAnyOrder(rudevicoReservation, echoReservation);
     }
 
     @DisplayName("사용자가 본인의 예약의 날짜나 시간을 변경한다")
@@ -205,8 +182,8 @@ class ReservationServiceTest {
     @Test
     void 예약_id가_일치하는_예약의_날짜나_시간을_변경하고_ReservationResponseDTO를_리턴한다() {
         // given
-        ReservationResponseDTO added = reservationService.reserve(new ReservationRequestDTO(
-                "루드비코", LocalDate.now().plusDays(1), 1L, 1L
+        ReservationResponseDto added = reservationService.reserve(getMember(), new ReservationRequestDTO(
+                LocalDate.now().plusDays(1), 1L, 1L
         ));
 
         // when
@@ -220,7 +197,7 @@ class ReservationServiceTest {
         );
 
         // then
-        ReservationResponseDTO foundAfterUpdate = reservationService.findById(added.id());
+        ReservationResponseDto foundAfterUpdate = reservationService.findById(added.id());
 
         assertThat(foundAfterUpdate)
                 .usingRecursiveComparison()
@@ -235,8 +212,8 @@ class ReservationServiceTest {
     @Test
     void 과거_시점으로_변경하면_PastDateReservationException을_던진다() {
         // given
-        ReservationResponseDTO added = reservationService.reserve(new ReservationRequestDTO(
-                "루드비코", LocalDate.now().plusDays(1), 1L, 1L
+        ReservationResponseDto added = reservationService.reserve(getMember(), new ReservationRequestDTO(
+                LocalDate.now().plusDays(1), 1L, 1L
         ));
 
         // when and then
@@ -268,8 +245,8 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_예약_시간으로_변경하면_ReservationTimeNotFoundException을_던진다() {
         // given
-        ReservationResponseDTO added = reservationService.reserve(new ReservationRequestDTO(
-                "루드비코", LocalDate.now().plusDays(1), 1L, 1L
+        ReservationResponseDto added = reservationService.reserve(getMember(), new ReservationRequestDTO(
+                LocalDate.now().plusDays(1), 1L, 1L
         ));
 
         // when and then
@@ -288,8 +265,8 @@ class ReservationServiceTest {
     @Test
     void 존재하지_않는_예약을_변경하면_ReservationNotFoundException을_던진다() {
         // given
-        ReservationResponseDTO added = reservationService.reserve(new ReservationRequestDTO(
-                "루드비코", LocalDate.now().plusDays(1), 1L, 1L
+        ReservationResponseDto added = reservationService.reserve(getMember(), new ReservationRequestDTO(
+                LocalDate.now().plusDays(1), 1L, 1L
         ));
 
         // when and then
@@ -308,13 +285,13 @@ class ReservationServiceTest {
     @Test
     void 이미_다른_예약이_존재하는_시점으로_예약을_변경하면_DuplicatedReservationException을_던진다() {
         // given
-        ReservationResponseDTO added = reservationService.reserve(new ReservationRequestDTO(
-                "루드비코", LocalDate.now().plusDays(1), 1L, 1L
+        ReservationResponseDto added = reservationService.reserve(getMember(), new ReservationRequestDTO(
+                LocalDate.now().plusDays(1), 1L, 1L
         ));
 
         LocalDate dateForUpdate = added.date().plusDays(2);
-        reservationService.reserve(new ReservationRequestDTO(
-                "루드비코", dateForUpdate, 1L, 1L
+        reservationService.reserve(getMember(), new ReservationRequestDTO(
+                dateForUpdate, 1L, 1L
         ));
 
         // when and then
@@ -332,8 +309,8 @@ class ReservationServiceTest {
     @Test
     void 변경_사항이_없다면_예외를_던지지_않는다() {
         // given
-        ReservationResponseDTO added = reservationService.reserve(new ReservationRequestDTO(
-                "루드비코", LocalDate.now().plusDays(1), 1L, 1L
+        ReservationResponseDto added = reservationService.reserve(getMember(), new ReservationRequestDTO(
+                LocalDate.now().plusDays(1), 1L, 1L
         ));
 
         // when and then
@@ -351,8 +328,8 @@ class ReservationServiceTest {
     @Test
     void 수정_요청_시_데이터가_누락되면_IllegalArgumentException을_던진다() {
         // given
-        ReservationResponseDTO added = reservationService.reserve(new ReservationRequestDTO(
-                "루드비코", LocalDate.now().plusDays(1), 1L, 1L
+        ReservationResponseDto added = reservationService.reserve(getMember(), new ReservationRequestDTO(
+                LocalDate.now().plusDays(1), 1L, 1L
         ));
 
         // when and then

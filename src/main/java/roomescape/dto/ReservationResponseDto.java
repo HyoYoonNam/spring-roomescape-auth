@@ -3,7 +3,7 @@ package roomescape.dto;
 import java.time.LocalDate;
 import roomescape.domain.Reservation;
 
-public record ReservationResponseDTO(
+public record ReservationResponseDto(
         Long id,
         String name,
         LocalDate date,
@@ -11,8 +11,8 @@ public record ReservationResponseDTO(
         ThemeResponseDTO theme
 ) {
 
-    public static ReservationResponseDTO from(Reservation reservation) {
-        return new ReservationResponseDTO(
+    public static ReservationResponseDto from(Reservation reservation) {
+        return new ReservationResponseDto(
                 reservation.getId(),
                 reservation.getName(),
                 reservation.getDate(),

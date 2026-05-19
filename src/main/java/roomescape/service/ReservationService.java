@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationRequestDTO;
-import roomescape.dto.ReservationResponseDTO;
+import roomescape.dto.ReservationResponseDto;
 import roomescape.dto.ReservationUpdateDtoDateAndTimeIdOnly;
 import roomescape.exception.DuplicatedReservationException;
 import roomescape.exception.PastDateReservationException;
@@ -40,30 +41,27 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
-    public List<ReservationResponseDTO> readAllReservation() {
+    public List<ReservationResponseDto> readAllReservation() {
         return reservationRepository.findAll()
                 .stream()
-                .map(ReservationResponseDTO::from)
+                .map(ReservationResponseDto::from)
                 .toList();
     }
 
-    public List<ReservationResponseDTO> findAllByUsername(String username) {
-        if (username == null || username.isBlank()) {
-            throw new IllegalArgumentException("사용자 이름은 비어있거나 공백일 수 없습니다.");
-        }
-        return reservationRepository.findAllByUsername(username)
+    public List<ReservationResponseDto> findAllByMember(Member member) {
+        return reservationRepository.findAllByLoginId(member.getLoginId())
                 .stream()
-                .map(ReservationResponseDTO::from)
+                .map(ReservationResponseDto::from)
                 .toList();
     }
 
-    public ReservationResponseDTO findById(Long id) {
+    public ReservationResponseDto findById(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("ID로 예약 조회 실패: " + id));
-        return ReservationResponseDTO.from(reservation);
+        return ReservationResponseDto.from(reservation);
     }
 
-    public ReservationResponseDTO reserve(ReservationRequestDTO reservationRequestDTO) {
+    public ReservationResponseDto reserve(Member member, ReservationRequestDTO reservationRequestDTO) {
         ReservationTime time = reservationTimeRepository.findById(reservationRequestDTO.timeId())
                 .orElseThrow(() ->
                         new ReservationTimeNotFoundException("ID로 예약 시간 조회 실패: " + reservationRequestDTO.timeId())
@@ -74,7 +72,7 @@ public class ReservationService {
                 );
 
         Reservation reservation = Reservation.withoutId(
-                reservationRequestDTO.name(),
+                member,
                 reservationRequestDTO.date(),
                 time,
                 theme
@@ -83,7 +81,7 @@ public class ReservationService {
         validateReservationPolicy(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
-        return ReservationResponseDTO.from(savedReservation);
+        return ReservationResponseDto.from(savedReservation);
     }
 
     public int update(Long reservationId, ReservationUpdateDtoDateAndTimeIdOnly updateDto) {
@@ -96,7 +94,7 @@ public class ReservationService {
         return reservationRepository.update(reservation);
     }
 
-    public int cancelReservation(ReservationRequestDTO requestDTO) {
+    public int cancelReservation(Member member, ReservationRequestDTO requestDTO) {
         ReservationTime time = reservationTimeRepository.findById(requestDTO.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException("취소 대상을 위한 시간 조회 실패: " + requestDTO.timeId()));
 
@@ -105,13 +103,13 @@ public class ReservationService {
         }
 
         int deletedRows = reservationRepository.deleteReservationWith(
-                requestDTO.name(),
+                member.getName(),
                 requestDTO.date(),
                 requestDTO.timeId(),
                 requestDTO.themeId()
         );
         if (deletedRows == 0) {
-            throw new ReservationNotFoundException("취소할 예약 정보를 찾을 수 없음: " + requestDTO.name());
+            throw new ReservationNotFoundException("취소할 예약 정보를 찾을 수 없음: " + member.getName());
         }
 
         return deletedRows;

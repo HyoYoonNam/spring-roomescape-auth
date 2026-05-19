@@ -13,6 +13,8 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByUsername(String username);
 
+    List<Reservation> findAllByLoginId(String loginId);
+
     Optional<Reservation> findById(Long id);
 
     Optional<Long> findReservationIdWith(LocalDate date, Long timeId, Long themeId);

@@ -1,20 +1,28 @@
 package roomescape.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.dto.MemberResponse;
 import roomescape.dto.TokenRequestDto;
 import roomescape.dto.TokenResponseDto;
+import roomescape.infreastructure.AuthorizationExtractor;
+import roomescape.infreastructure.BearerAuthorizationExtractor;
 import roomescape.service.AuthService;
+import roomescape.domain.Member;
 
 @RestController
 public class LoginController {
 
     private final AuthService authService;
+    private final AuthorizationExtractor<String> authorizationExtractor;
 
     public LoginController(AuthService authService) {
         this.authService = authService;
+        this.authorizationExtractor = new BearerAuthorizationExtractor();
     }
 
     /**
@@ -35,5 +43,14 @@ public class LoginController {
         return ResponseEntity
                 .ok()
                 .body(tokenResponse);
+    }
+
+    @GetMapping("/members/me")
+    public ResponseEntity<MemberResponse> findMe(HttpServletRequest request) {
+        String token = authorizationExtractor.extract(request);
+        Member member = authService.findMemberByToken(token);
+        return ResponseEntity
+                .ok()
+                .body(MemberResponse.from(member));
     }
 }

@@ -12,13 +12,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class ReservationTest {
 
-    @DisplayName("이름이 비어 있는 예약은 생성할 수 없다")
-    @ParameterizedTest(name = "이름이 [{0}]이면 생성할 수 없다.")
-    @NullSource
-    @ValueSource(strings = {"", " ", "  "})
-    void 이름이_비어_있으면_IllegalArgumentException_예외를_던진다(String emptyName) {
+    private final Member member = Member.withoutId("sample@sample.com", "루드비코", "samplePassword");
+
+    @DisplayName("회원 정보가 없는 예약은 생성할 수 없다")
+    @Test
+    void 회원_정보가_없으면_IllegalArgumentException_예외를_던진다() {
         assertThatThrownBy(() -> Reservation.withoutId(
-                        emptyName,
+                        null,
                         LocalDate.now(),
                         ReservationTime.withoutId(LocalTime.now()),
                         Theme.withoutId("sample theme", "sample description", "sample url")
@@ -30,7 +30,7 @@ class ReservationTest {
     @Test
     void 날짜가_없으면_IllegalArgumentException_예외를_던진다() {
         assertThatThrownBy(() -> Reservation.withoutId(
-                        "루드비코",
+                        member,
                         null,
                         ReservationTime.withoutId(LocalTime.now()),
                         Theme.withoutId("sample theme", "sample description", "sample url")
@@ -42,7 +42,7 @@ class ReservationTest {
     @Test
     void 예약_시간이_없으면_IllegalArgumentException_예외를_던진다() {
         assertThatThrownBy(() -> Reservation.withoutId(
-                        "루드비코",
+                        member,
                         LocalDate.now(),
                         null,
                         Theme.withoutId("sample theme", "sample description", "sample url")
@@ -54,7 +54,7 @@ class ReservationTest {
     @Test
     void 테마가_없으면_IllegalArgumentException_예외를_던진다() {
         assertThatThrownBy(() -> Reservation.withoutId(
-                        "루드비코",
+                        member,
                         LocalDate.now(),
                         ReservationTime.withoutId(LocalTime.now()),
                         null
@@ -66,7 +66,7 @@ class ReservationTest {
     @Test
     void 수정_시_날짜가_없으면_IllegalArgumentException_예외를_던진다() {
         Reservation reservation = Reservation.withoutId(
-                "루드비코",
+                member,
                 LocalDate.now(),
                 ReservationTime.withoutId(LocalTime.now()),
                 Theme.withoutId("sample theme", "sample description", "sample url")
@@ -80,7 +80,7 @@ class ReservationTest {
     @Test
     void 수정_시_시간이_없으면_IllegalArgumentException_예외를_던진다() {
         Reservation reservation = Reservation.withoutId(
-                "루드비코",
+                member,
                 LocalDate.now(),
                 ReservationTime.withoutId(LocalTime.now()),
                 Theme.withoutId("sample theme", "sample description", "sample url")

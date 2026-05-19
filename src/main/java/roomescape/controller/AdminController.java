@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.ReservationResponseDTO;
+import roomescape.dto.ReservationResponseDto;
 import roomescape.dto.ReservationTimeRequestDTO;
 import roomescape.dto.ReservationTimeResponseDTO;
 import roomescape.dto.ThemeRequestDTO;
@@ -39,12 +39,12 @@ public class AdminController {
     }
 
     @GetMapping("/reservations")
-    public List<ReservationResponseDTO> readAll() {
+    public List<ReservationResponseDto> readAll() {
         return reservationService.readAllReservation();
     }
 
     @GetMapping("/reservations/{id}")
-    public ReservationResponseDTO findReservationById(@PathVariable Long id) {
+    public ReservationResponseDto findReservationById(@PathVariable Long id) {
         return reservationService.findById(id);
     }
 

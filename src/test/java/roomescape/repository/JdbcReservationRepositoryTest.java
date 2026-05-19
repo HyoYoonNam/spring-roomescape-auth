@@ -11,12 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 @JdbcTest
-@Import({JdbcReservationRepository.class, JdbcReservationTimeRepository.class, JdbcThemeRepository.class})
+@Import({JdbcReservationRepository.class, JdbcReservationTimeRepository.class, JdbcThemeRepository.class, JdbcMemberRepository.class})
 class JdbcReservationRepositoryTest {
 
     @Autowired
@@ -25,11 +26,16 @@ class JdbcReservationRepositoryTest {
     ReservationTimeRepository reservationTimeRepository;
     @Autowired
     ThemeRepository themeRepository;
+    @Autowired
+    MemberRepository memberRepository;
 
     @DisplayName("예약을 저장한다")
     @Test
     void 예약을_저장하면_id를_부여한다() {
         // given
+        Member member = memberRepository.save(
+                Member.withoutId("sample@sample.com", "루드비코", "samplePassword")
+        );
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.parse("10:20:30"))
         );
@@ -37,7 +43,7 @@ class JdbcReservationRepositoryTest {
                 Theme.withoutId("귀신찾기", "귀신을 찾는다", "example.com")
         );
         Reservation reservation =
-                Reservation.withoutId("루드비코", LocalDate.parse("2026-05-06"), reservationTime, theme);
+                Reservation.withoutId(member, LocalDate.parse("2026-05-06"), reservationTime, theme);
 
         // when
         Reservation saved = reservationRepository.save(reservation);
@@ -50,6 +56,9 @@ class JdbcReservationRepositoryTest {
     @Test
     void 예약을_id로_조회한다() {
         // given
+        Member member = memberRepository.save(
+                Member.withoutId("sample@sample.com", "루드비코", "samplePassword")
+        );
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.parse("10:20:30"))
         );
@@ -57,7 +66,7 @@ class JdbcReservationRepositoryTest {
                 Theme.withoutId("귀신찾기", "귀신을 찾는다", "example.com")
         );
         Reservation reservation =
-                Reservation.withoutId("루드비코", LocalDate.parse("2026-05-06"), reservationTime, theme);
+                Reservation.withoutId(member, LocalDate.parse("2026-05-06"), reservationTime, theme);
 
         // when
         Reservation saved = reservationRepository.save(reservation);
@@ -73,6 +82,12 @@ class JdbcReservationRepositoryTest {
     @Test
     void 저장된_모든_예약을_조회한다() {
         // given
+        Member member1 = memberRepository.save(
+                Member.withoutId("sample1@sample.com", "루드비코", "samplePassword")
+        );
+        Member member2 = memberRepository.save(
+                Member.withoutId("sample2@sample.com", "코코", "samplePassword")
+        );
         ReservationTime reservationTime1 = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.parse("10:20:30"))
         );
@@ -80,13 +95,13 @@ class JdbcReservationRepositoryTest {
                 Theme.withoutId("귀신찾기", "귀신을 찾는다", "example.com")
         );
         Reservation rudevicoReservation =
-                Reservation.withoutId("루드비코", LocalDate.parse("2026-05-06"), reservationTime1, theme);
+                Reservation.withoutId(member1, LocalDate.parse("2026-05-06"), reservationTime1, theme);
 
         ReservationTime reservationTime2 = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.parse("11:20:30"))
         );
         Reservation cocoReservation =
-                Reservation.withoutId("코코", LocalDate.parse("2026-05-06"), reservationTime2, theme);
+                Reservation.withoutId(member2, LocalDate.parse("2026-05-06"), reservationTime2, theme);
 
         // when
         Reservation savedRudevicoReservation = reservationRepository.save(rudevicoReservation);
@@ -105,6 +120,12 @@ class JdbcReservationRepositoryTest {
     @Test
     void 사용자_이름을_조건으로_모든_예약을_조회한다() {
         // given
+        Member member1 = memberRepository.save(
+                Member.withoutId("sample1@sample.com", "루드비코", "samplePassword")
+        );
+        Member member2 = memberRepository.save(
+                Member.withoutId("sample2@sample.com", "코코", "samplePassword")
+        );
         ReservationTime reservationTime1 = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.parse("10:20:30"))
         );
@@ -112,13 +133,13 @@ class JdbcReservationRepositoryTest {
                 Theme.withoutId("귀신찾기", "귀신을 찾는다", "example.com")
         );
         Reservation rudevicoReservation =
-                Reservation.withoutId("루드비코", LocalDate.parse("2026-05-06"), reservationTime1, theme);
+                Reservation.withoutId(member1, LocalDate.parse("2026-05-06"), reservationTime1, theme);
 
         ReservationTime reservationTime2 = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.parse("11:20:30"))
         );
         Reservation cocoReservation =
-                Reservation.withoutId("코코", LocalDate.parse("2026-05-06"), reservationTime2, theme);
+                Reservation.withoutId(member2, LocalDate.parse("2026-05-06"), reservationTime2, theme);
 
         Reservation savedRudevicoReservation = reservationRepository.save(rudevicoReservation);
         Reservation savedCocoReservation = reservationRepository.save(cocoReservation);
@@ -137,6 +158,9 @@ class JdbcReservationRepositoryTest {
     @Test
     void 예약을_삭제한다() {
         // given
+        Member member = memberRepository.save(
+                Member.withoutId("sample@sample.com", "루드비코", "samplePassword")
+        );
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.parse("10:20:30"))
         );
@@ -144,11 +168,12 @@ class JdbcReservationRepositoryTest {
                 Theme.withoutId("귀신찾기", "귀신을 찾는다", "example.com")
         );
         Reservation reservation =
-                Reservation.withoutId("루드비코", LocalDate.parse("2026-05-06"), reservationTime, theme);
+                Reservation.withoutId(member, LocalDate.parse("2026-05-06"), reservationTime, theme);
+        Reservation saved = reservationRepository.save(reservation);
 
         // when
-        reservationRepository.deleteById(reservation.getId());
-        Optional<Reservation> result = reservationRepository.findById(reservation.getId());
+        reservationRepository.deleteById(saved.getId());
+        Optional<Reservation> result = reservationRepository.findById(saved.getId());
 
         // then
         assertThat(result).isNotPresent();
@@ -158,6 +183,9 @@ class JdbcReservationRepositoryTest {
     @Test
     void 사용자_이름과_날짜와_예약_시간과_테마를_기준으로_예약을_취소한다() {
         // given
+        Member member = memberRepository.save(
+                Member.withoutId("sample@sample.com", "루드비코", "samplePassword")
+        );
         ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.parse("10:20"))
         );
@@ -165,7 +193,7 @@ class JdbcReservationRepositoryTest {
                 Theme.withoutId("귀신찾기", "귀신을 찾는다", "example.com")
         );
         Reservation reservation =
-                Reservation.withoutId("루드비코", LocalDate.now().plusDays(1), reservationTime, theme);
+                Reservation.withoutId(member, LocalDate.now().plusDays(1), reservationTime, theme);
 
         Reservation saved = reservationRepository.save(reservation);
 
@@ -185,6 +213,9 @@ class JdbcReservationRepositoryTest {
     @Test
     void 전달한_예약_도메인_객체와_동일한_id를_가지는_행의_날짜와_시간을_변경한다() {
         // given
+        Member member = memberRepository.save(
+                Member.withoutId("sample@sample.com", "루드비코", "samplePassword")
+        );
         ReservationTime time = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.parse("10:00"))
         );
@@ -197,7 +228,7 @@ class JdbcReservationRepositoryTest {
 
         Reservation saved = reservationRepository.save(
                 Reservation.withoutId(
-                        "루드비코",
+                        member,
                         LocalDate.now().plusDays(1),
                         time,
                         theme
@@ -207,7 +238,7 @@ class JdbcReservationRepositoryTest {
         // when
         Reservation reservationForUpdate = new Reservation(
                 saved.getId(),
-                "루드비코",
+                member,
                 LocalDate.now().plusDays(1),
                 timeForUpdate,
                 theme
@@ -219,11 +250,11 @@ class JdbcReservationRepositoryTest {
                 .orElseThrow();
         assertThat(foundAfterUpdate)
                 .usingRecursiveComparison()
-                .comparingOnlyFields("id", "name")
+                .comparingOnlyFields("id", "member")
                 .isEqualTo(saved);
         assertThat(foundAfterUpdate)
                 .usingRecursiveComparison()
-                .ignoringFields("id", "name")
+                .ignoringFields("id", "member")
                 .isEqualTo(reservationForUpdate);
     }
 }

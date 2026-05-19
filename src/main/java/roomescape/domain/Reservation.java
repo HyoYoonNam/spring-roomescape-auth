@@ -6,22 +6,22 @@ import java.time.LocalDateTime;
 public class Reservation {
 
     private final Long id;
-    private final String name;
+    private final Member member;
     private LocalDate date;
     private ReservationTime time;
     private final Theme theme;
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time, theme);
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+        validate(member, date, time, theme);
         this.id = id;
-        this.name = name;
+        this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    public static Reservation withoutId(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, name, date, time, theme);
+    public static Reservation withoutId(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        return new Reservation(null, member, date, time, theme);
     }
 
     public void changeDateAndTime(LocalDate date, ReservationTime time) {
@@ -35,8 +35,12 @@ public class Reservation {
         return id;
     }
 
+    public Member getMember() {
+        return member;
+    }
+
     public String getName() {
-        return name;
+        return member.getName();
     }
 
     public LocalDate getDate() {
@@ -67,23 +71,23 @@ public class Reservation {
     public String toString() {
         return "Reservation{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", member=" + member +
                 ", date=" + date +
                 ", time=" + time +
                 ", theme=" + theme +
                 '}';
     }
 
-    private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
-        validateName(name);
+    private void validate(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        validateMember(member);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
     }
 
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("이름은 비어있을 수 없습니다.");
+    private void validateMember(Member member) {
+        if (member == null) {
+            throw new IllegalArgumentException("회원 정보는 필수입니다.");
         }
     }
 
