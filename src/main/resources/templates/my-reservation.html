@@ -120,8 +120,6 @@
 
 <div class="container">
   <h1>내 예약 확인</h1>
-  <input type="text" id="username-input" placeholder="이름을 입력하세요">
-  <button id="search-btn">조회</button>
 </div>
 
 <div class="container">
@@ -189,7 +187,14 @@
     .then(res => res.json())
     .then(times => { allTimes = times; });
 
-    document.getElementById('search-btn').addEventListener('click', loadReservations);
+    // 로그인 상태가 아니면 로그인 페이지로 리다이렉트 (선택 사항)
+    if (!getAuthToken()) {
+        alert('로그인이 필요한 서비스입니다.');
+        location.href = '/login';
+        return;
+    }
+
+    loadReservations();
 
     document.getElementById('close-modal-btn').addEventListener('click', closeModal);
     document.getElementById('save-edit-btn').addEventListener('click', saveEdit);
@@ -209,10 +214,7 @@
   }
 
   function loadReservations() {
-    const username = document.getElementById('username-input').value;
-    if (!username) return alert('이름을 입력해주세요.');
-
-    fetch(`/api/reservations?username=${username}`, {
+    fetch(`/api/reservations`, {
       headers: getAuthHeaders()
     })
     .then(async res => {
@@ -236,7 +238,7 @@
           <td>${res.time.startAt}</td>
           <td>
             <button class="edit-btn" onclick="openEditModal(${res.id}, '${res.theme.name}', '${res.date}', ${res.time.id})">수정</button>
-            <button class="cancel-btn" onclick="cancelReservation('${res.name}', '${res.date}', ${res.time.id}, ${res.theme.id})">취소</button>
+            <button class="cancel-btn" onclick="cancelReservation('${res.date}', ${res.time.id}, ${res.theme.id})">취소</button>
           </td>
         `;
         list.appendChild(tr);
@@ -245,11 +247,10 @@
     .catch(err => console.error(err));
   }
 
-  function cancelReservation(name, date, timeId, themeId) {
+  function cancelReservation(date, timeId, themeId) {
     if (!confirm('정말 취소하시겠습니까?')) return;
 
     const params = new URLSearchParams({
-      name: name,
       date: date,
       timeId: timeId,
       themeId: themeId

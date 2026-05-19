@@ -30,6 +30,9 @@ class BusinessExceptionHandlerTest {
     @MockitoBean
     private roomescape.infreastructure.LoginInterceptor loginInterceptor;
 
+    @MockitoBean
+    private roomescape.infreastructure.LoginMemberArgumentResolver loginMemberArgumentResolver;
+
     @org.junit.jupiter.api.BeforeEach
     void setUp() throws Exception {
         org.mockito.Mockito.when(loginInterceptor.preHandle(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(true);

@@ -27,6 +27,9 @@ class GlobalExceptionHandlerTest {
     @MockitoBean
     private LoginInterceptor loginInterceptor;
 
+    @MockitoBean
+    private roomescape.infreastructure.LoginMemberArgumentResolver loginMemberArgumentResolver;
+
     @org.junit.jupiter.api.BeforeEach
     void setUp() throws Exception {
         when(loginInterceptor.preHandle(any(), any(), any())).thenReturn(true);

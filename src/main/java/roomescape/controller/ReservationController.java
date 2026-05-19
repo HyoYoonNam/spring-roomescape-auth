@@ -1,6 +1,5 @@
 package roomescape.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -14,13 +13,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.annotation.Login;
 import roomescape.domain.Member;
 import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDto;
 import roomescape.dto.ReservationUpdateDtoDateAndTimeIdOnly;
-import roomescape.infreastructure.AuthorizationExtractor;
-import roomescape.infreastructure.BearerAuthorizationExtractor;
-import roomescape.service.AuthService;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -28,30 +25,22 @@ import roomescape.service.ReservationService;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final AuthService authService;
-    private final AuthorizationExtractor<String> authorizationExtractor;
 
-    public ReservationController(ReservationService reservationService, AuthService authService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.authService = authService;
-        this.authorizationExtractor = new BearerAuthorizationExtractor();
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponseDto>> readMyReservations(HttpServletRequest request) {
-        String token = authorizationExtractor.extract(request);
-        Member member = authService.findMemberByToken(token);
+    public ResponseEntity<List<ReservationResponseDto>> readMyReservations(@Login Member member) {
         return ResponseEntity
                 .ok(reservationService.findAllByMember(member));
     }
 
     @PostMapping
     public ResponseEntity<Void> add(
-            HttpServletRequest request,
+            @Login Member member,
             @Valid @RequestBody ReservationRequestDTO reservationRequest
     ) {
-        String token = authorizationExtractor.extract(request);
-        Member member = authService.findMemberByToken(token);
         ReservationResponseDto saved = reservationService.reserve(member, reservationRequest);
         return ResponseEntity
                 .created(URI.create("/reservations/" + saved.id()))
@@ -71,11 +60,9 @@ public class ReservationController {
 
     @DeleteMapping
     public ResponseEntity<Void> delete(
-            HttpServletRequest request,
+            @Login Member member,
             @Valid @ModelAttribute ReservationRequestDTO reservationRequest
     ) {
-        String token = authorizationExtractor.extract(request);
-        Member member = authService.findMemberByToken(token);
         reservationService.cancelReservation(member, reservationRequest);
         return ResponseEntity
                 .noContent()

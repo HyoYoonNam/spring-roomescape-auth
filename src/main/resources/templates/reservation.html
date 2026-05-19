@@ -117,9 +117,6 @@
 </div>
 
 <div class="container">
-  <h3>예약자 정보</h3>
-  <input type="text" id="user-name" placeholder="이름을 입력하세요">
-
   <h3>예약 날짜 선택</h3>
   <input type="date" id="date-picker">
 
@@ -257,10 +254,9 @@
       .catch(err => console.error(err));
 
     document.getElementById('reserve-btn').addEventListener('click', () => {
-      const name = document.getElementById('user-name').value;
       const date = datePicker.value;
 
-      if (!name || !date || !selectedTimeId) {
+      if (!date || !selectedTimeId) {
         alert('모든 정보를 입력해주세요.');
         return;
       }
@@ -268,7 +264,7 @@
       fetch('/api/reservations', {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ themeId: parseInt(themeId), name, date, timeId: selectedTimeId })
+        body: JSON.stringify({ themeId: parseInt(themeId), date, timeId: selectedTimeId })
       })
       .then(async res => {
         if (res.status === 201) {

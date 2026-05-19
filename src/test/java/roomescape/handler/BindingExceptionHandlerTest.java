@@ -26,6 +26,9 @@ class BindingExceptionHandlerTest {
     @MockBean
     private LoginInterceptor loginInterceptor;
 
+    @MockBean
+    private roomescape.infreastructure.LoginMemberArgumentResolver loginMemberArgumentResolver;
+
     @org.junit.jupiter.api.BeforeEach
     void setUp() throws Exception {
         when(loginInterceptor.preHandle(any(), any(), any())).thenReturn(true);
