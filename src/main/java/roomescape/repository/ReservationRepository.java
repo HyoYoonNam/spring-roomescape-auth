@@ -23,7 +23,7 @@ public interface ReservationRepository {
 
     void deleteById(Long id);
 
-    int deleteReservationWith(String name, LocalDate date, Long timeId, Long themeId);
+    int deleteReservationWith(Long memberId, LocalDate date, Long timeId, Long themeId);
 
     boolean existsReservationByTimeId(Long timeId);
 

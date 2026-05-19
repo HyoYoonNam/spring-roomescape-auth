@@ -154,7 +154,7 @@ class AdminControllerE2ETest {
         @DisplayName("예약 시간 생성 시 필수 파라미터가 누락되면 400 Bad Request를 응답한다")
         @Test
         void 예약_시간_생성_시_시간이_누락되면_400을_응답한다() {
-            Map<String, String> requestBody = Map.of(); // empty body
+            Map<String, String> requestBody = Map.of();
 
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)

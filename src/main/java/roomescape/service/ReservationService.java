@@ -84,8 +84,9 @@ public class ReservationService {
         return ReservationResponseDto.from(savedReservation);
     }
 
-    public int update(Long reservationId, ReservationUpdateDtoDateAndTimeIdOnly updateDto) {
+    public int update(Member member, Long reservationId, ReservationUpdateDtoDateAndTimeIdOnly updateDto) {
         Reservation reservation = getReservation(reservationId);
+        validateOwner(member, reservation);
         validateModifiable(reservation);
 
         updateState(reservation, updateDto);
@@ -94,7 +95,7 @@ public class ReservationService {
         return reservationRepository.update(reservation);
     }
 
-    public int cancelReservation(Member member, ReservationRequestDTO requestDTO) {
+    public void cancelReservation(Member member, ReservationRequestDTO requestDTO) {
         ReservationTime time = reservationTimeRepository.findById(requestDTO.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException("취소 대상을 위한 시간 조회 실패: " + requestDTO.timeId()));
 
@@ -102,17 +103,23 @@ public class ReservationService {
             throw new PastDateCancellationException("이미 지난 예약 취소 시도");
         }
 
-        int deletedRows = reservationRepository.deleteReservationWith(
-                member.getName(),
-                requestDTO.date(),
-                requestDTO.timeId(),
-                requestDTO.themeId()
-        );
-        if (deletedRows == 0) {
-            throw new ReservationNotFoundException("취소할 예약 정보를 찾을 수 없음: " + member.getName());
-        }
+        Long reservationId = reservationRepository.findReservationIdWith(
+                        requestDTO.date(),
+                        requestDTO.timeId(),
+                        requestDTO.themeId()
+                )
+                .orElseThrow(() -> new ReservationNotFoundException("취소할 예약 정보를 찾을 수 없습니다."));
 
-        return deletedRows;
+        Reservation reservation = getReservation(reservationId);
+        validateOwner(member, reservation);
+
+        reservationRepository.deleteById(reservationId);
+    }
+
+    private void validateOwner(Member member, Reservation reservation) {
+        if (!reservation.getMember().getId().equals(member.getId())) {
+            throw new roomescape.exception.ForbiddenException("본인의 예약만 수정/삭제할 수 있습니다.");
+        }
     }
 
     private boolean isPast(LocalDateTime targetDateTime) {

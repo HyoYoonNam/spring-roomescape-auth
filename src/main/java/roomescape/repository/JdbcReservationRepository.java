@@ -231,21 +231,21 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public int deleteReservationWith(
-            String name,
+            Long memberId,
             LocalDate date,
             Long timeId,
             Long themeId
     ) {
         String sql = """
                 DELETE FROM reservation AS r
-                WHERE r.member_id = (SELECT m.id FROM member AS m WHERE m.name = :name)
+                WHERE r.member_id = :memberId
                 AND r.date = :date
                 AND r.time_id = :timeId
                 AND r.theme_id = :themeId
                 """;
 
         SqlParameterSource parameterSource = new MapSqlParameterSource()
-                .addValue("name", name)
+                .addValue("memberId", memberId)
                 .addValue("date", date)
                 .addValue("timeId", timeId)
                 .addValue("themeId", themeId);

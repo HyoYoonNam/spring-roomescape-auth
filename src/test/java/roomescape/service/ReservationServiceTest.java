@@ -189,6 +189,7 @@ class ReservationServiceTest {
         // when
         LocalDate dateForUpdate = added.date().plusDays(1);
         reservationService.update(
+                getMember(),
                 added.id(),
                 new ReservationUpdateDtoDateAndTimeIdOnly(
                         dateForUpdate,
@@ -219,6 +220,7 @@ class ReservationServiceTest {
         // when and then
         LocalDate dateForUpdate = added.date().minusDays(2);
         assertThatThrownBy(() -> reservationService.update(
+                getMember(),
                 added.id(),
                 new ReservationUpdateDtoDateAndTimeIdOnly(
                         dateForUpdate,
@@ -232,6 +234,7 @@ class ReservationServiceTest {
     @Test
     void 과거_시점의_예약을_변경하면_PastDateModificationException을_던진다() {
         assertThatThrownBy(() -> reservationService.update(
+                getMember(),
                 1L,
                 new ReservationUpdateDtoDateAndTimeIdOnly(
                         LocalDate.now().plusDays(1),
@@ -252,6 +255,7 @@ class ReservationServiceTest {
         // when and then
         LocalDate dateForUpdate = added.date().plusDays(1);
         assertThatThrownBy(() -> reservationService.update(
+                getMember(),
                 added.id(),
                 new ReservationUpdateDtoDateAndTimeIdOnly(
                         dateForUpdate,
@@ -272,6 +276,7 @@ class ReservationServiceTest {
         // when and then
         LocalDate dateForUpdate = added.date().plusDays(1);
         assertThatThrownBy(() -> reservationService.update(
+                getMember(),
                 Long.MAX_VALUE,
                 new ReservationUpdateDtoDateAndTimeIdOnly(
                         dateForUpdate,
@@ -296,6 +301,7 @@ class ReservationServiceTest {
 
         // when and then
         assertThatThrownBy(() -> reservationService.update(
+                getMember(),
                 added.id(),
                 new ReservationUpdateDtoDateAndTimeIdOnly(
                         dateForUpdate,
@@ -315,6 +321,7 @@ class ReservationServiceTest {
 
         // when and then
         assertThatNoException().isThrownBy(() -> reservationService.update(
+                getMember(),
                 added.id(),
                 new ReservationUpdateDtoDateAndTimeIdOnly(
                         added.date(),
@@ -334,6 +341,7 @@ class ReservationServiceTest {
 
         // when and then
         assertThatThrownBy(() -> reservationService.update(
+                getMember(),
                 added.id(),
                 new ReservationUpdateDtoDateAndTimeIdOnly(null, null)
         )).isExactlyInstanceOf(IllegalArgumentException.class);

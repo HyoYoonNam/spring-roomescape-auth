@@ -49,10 +49,11 @@ public class ReservationController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(
+            @Login Member member,
             @PathVariable Long id,
             @Valid @RequestBody ReservationUpdateDtoDateAndTimeIdOnly updateDto
     ) {
-        reservationService.update(id, updateDto);
+        reservationService.update(member, id, updateDto);
         return ResponseEntity
                 .noContent()
                 .build();

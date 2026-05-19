@@ -263,7 +263,7 @@ class ReservationControllerE2ETest {
                     .when().get("/api/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(6));
+                    .body("size()", is(8));
         }
 
     }
