@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.Login;
-import roomescape.domain.Member;
+import roomescape.dto.LoginMember;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.TokenRequestDto;
 import roomescape.dto.TokenResponseDto;
@@ -42,9 +42,9 @@ public class LoginController {
     }
 
     @GetMapping("/members/me")
-    public ResponseEntity<MemberResponse> findMe(@Login Member member) {
+    public ResponseEntity<MemberResponse> findMe(@Login LoginMember loginMember) {
         return ResponseEntity
                 .ok()
-                .body(MemberResponse.from(member));
+                .body(MemberResponse.from(loginMember));
     }
 }

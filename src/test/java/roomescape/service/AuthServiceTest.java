@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import roomescape.domain.Member;
+import roomescape.dto.LoginMember;
 import roomescape.dto.TokenRequestDto;
 import roomescape.dto.TokenResponseDto;
 import roomescape.exception.AuthorizationException;
@@ -95,6 +96,30 @@ class AuthServiceTest {
             assertThatThrownBy(() ->
                     authService.createToken(new TokenRequestDto(NOEXISTS_LOGIN_ID, SAMPLE_PASSWORD))
             ).isExactlyInstanceOf(AuthorizationException.class);
+        }
+    }
+
+    @Nested
+    class 토큰_해석_시나리오 {
+
+        @DisplayName("유효한 토큰을 해석하여 LoginMember DTO를 반환한다")
+        @Test
+        void 유효한_토큰이면_LoginMember를_리턴한다() {
+            Mockito.when(mockJwtTokenProvider.getPayload("validToken")).thenReturn(SAMPLE_LOGIN_ID);
+            LoginMember loginMember = authService.findMemberByToken("validToken");
+
+            assertThat(loginMember.id()).isEqualTo(1L);
+            assertThat(loginMember.loginId()).isEqualTo(SAMPLE_LOGIN_ID);
+            assertThat(loginMember.name()).isEqualTo(SAMPLE_NAME);
+        }
+
+        @DisplayName("존재하지 않는 사용자의 토큰이면 AuthorizationException을 던진다")
+        @Test
+        void 존재하지_않는_사용자면_AuthorizationException을_던진다() {
+            Mockito.when(mockJwtTokenProvider.getPayload("invalidToken")).thenReturn(NOEXISTS_LOGIN_ID);
+
+            assertThatThrownBy(() -> authService.findMemberByToken("invalidToken"))
+                    .isExactlyInstanceOf(AuthorizationException.class);
         }
     }
 

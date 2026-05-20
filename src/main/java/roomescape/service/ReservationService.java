@@ -9,6 +9,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.dto.LoginMember;
 import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDto;
 import roomescape.dto.ReservationUpdateDtoDateAndTimeIdOnly;
@@ -19,6 +20,7 @@ import roomescape.exception.PastDateModificationException;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
+import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -30,15 +32,18 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository
+            ThemeRepository themeRepository,
+            MemberRepository memberRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
     }
 
     public List<ReservationResponseDto> readAllReservation() {
@@ -48,8 +53,8 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponseDto> findAllByMember(Member member) {
-        return reservationRepository.findAllByLoginId(member.getLoginId())
+    public List<ReservationResponseDto> findAllByMember(LoginMember loginMember) {
+        return reservationRepository.findAllByLoginId(loginMember.loginId())
                 .stream()
                 .map(ReservationResponseDto::from)
                 .toList();
@@ -61,7 +66,10 @@ public class ReservationService {
         return ReservationResponseDto.from(reservation);
     }
 
-    public ReservationResponseDto reserve(Member member, ReservationRequestDTO reservationRequestDTO) {
+    public ReservationResponseDto reserve(LoginMember loginMember, ReservationRequestDTO reservationRequestDTO) {
+        Member member = memberRepository.findById(loginMember.id())
+                .orElseThrow(() -> new roomescape.exception.AuthorizationException());
+
         ReservationTime time = reservationTimeRepository.findById(reservationRequestDTO.timeId())
                 .orElseThrow(() ->
                         new ReservationTimeNotFoundException("ID로 예약 시간 조회 실패: " + reservationRequestDTO.timeId())
@@ -84,9 +92,9 @@ public class ReservationService {
         return ReservationResponseDto.from(savedReservation);
     }
 
-    public int update(Member member, Long reservationId, ReservationUpdateDtoDateAndTimeIdOnly updateDto) {
+    public int update(LoginMember loginMember, Long reservationId, ReservationUpdateDtoDateAndTimeIdOnly updateDto) {
         Reservation reservation = getReservation(reservationId);
-        validateOwner(member, reservation);
+        validateOwner(loginMember, reservation);
         validateModifiable(reservation);
 
         updateState(reservation, updateDto);
@@ -95,7 +103,7 @@ public class ReservationService {
         return reservationRepository.update(reservation);
     }
 
-    public void cancelReservation(Member member, ReservationRequestDTO requestDTO) {
+    public void cancelReservation(LoginMember loginMember, ReservationRequestDTO requestDTO) {
         ReservationTime time = reservationTimeRepository.findById(requestDTO.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException("취소 대상을 위한 시간 조회 실패: " + requestDTO.timeId()));
 
@@ -111,13 +119,13 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationNotFoundException("취소할 예약 정보를 찾을 수 없습니다."));
 
         Reservation reservation = getReservation(reservationId);
-        validateOwner(member, reservation);
+        validateOwner(loginMember, reservation);
 
         reservationRepository.deleteById(reservationId);
     }
 
-    private void validateOwner(Member member, Reservation reservation) {
-        if (!reservation.getMember().getId().equals(member.getId())) {
+    private void validateOwner(LoginMember loginMember, Reservation reservation) {
+        if (!reservation.getMember().getId().equals(loginMember.id())) {
             throw new roomescape.exception.ForbiddenException("본인의 예약만 수정/삭제할 수 있습니다.");
         }
     }

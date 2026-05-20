@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.Login;
-import roomescape.domain.Member;
+import roomescape.dto.LoginMember;
 import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDto;
 import roomescape.dto.ReservationUpdateDtoDateAndTimeIdOnly;
@@ -31,17 +31,17 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponseDto>> readMyReservations(@Login Member member) {
+    public ResponseEntity<List<ReservationResponseDto>> readMyReservations(@Login LoginMember loginMember) {
         return ResponseEntity
-                .ok(reservationService.findAllByMember(member));
+                .ok(reservationService.findAllByMember(loginMember));
     }
 
     @PostMapping
     public ResponseEntity<Void> add(
-            @Login Member member,
+            @Login LoginMember loginMember,
             @Valid @RequestBody ReservationRequestDTO reservationRequest
     ) {
-        ReservationResponseDto saved = reservationService.reserve(member, reservationRequest);
+        ReservationResponseDto saved = reservationService.reserve(loginMember, reservationRequest);
         return ResponseEntity
                 .created(URI.create("/reservations/" + saved.id()))
                 .build();
@@ -49,11 +49,11 @@ public class ReservationController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(
-            @Login Member member,
+            @Login LoginMember loginMember,
             @PathVariable Long id,
             @Valid @RequestBody ReservationUpdateDtoDateAndTimeIdOnly updateDto
     ) {
-        reservationService.update(member, id, updateDto);
+        reservationService.update(loginMember, id, updateDto);
         return ResponseEntity
                 .noContent()
                 .build();
@@ -61,10 +61,10 @@ public class ReservationController {
 
     @DeleteMapping
     public ResponseEntity<Void> delete(
-            @Login Member member,
+            @Login LoginMember loginMember,
             @Valid @ModelAttribute ReservationRequestDTO reservationRequest
     ) {
-        reservationService.cancelReservation(member, reservationRequest);
+        reservationService.cancelReservation(loginMember, reservationRequest);
         return ResponseEntity
                 .noContent()
                 .build();
