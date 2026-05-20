@@ -26,14 +26,18 @@ public class LoginInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String token = authorizationExtractor.extract(request);
+        String token = null;
 
-        if (token == null && request.getCookies() != null) {
+        if (request.getCookies() != null) {
             token = Arrays.stream(request.getCookies())
                     .filter(cookie -> "token".equals(cookie.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);
+        }
+
+        if (token == null) {
+            token = authorizationExtractor.extract(request);
         }
 
         if (token == null) {

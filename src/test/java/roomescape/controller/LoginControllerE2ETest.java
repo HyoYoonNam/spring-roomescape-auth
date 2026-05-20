@@ -34,6 +34,9 @@ class LoginControllerE2ETest {
     private static final String NOT_EXISTS_PASSWORD = "notExistsPassword";
     private static final String SAMPLE_NAME = "유저1";
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Nested
     class 로그인_시나리오 {
 
@@ -125,6 +128,38 @@ class LoginControllerE2ETest {
                     .statusCode(HttpStatus.OK.value()).extract().as(MemberResponse.class);
 
             assertThat(member.name()).isEqualTo(SAMPLE_NAME);
+        }
+
+        @DisplayName("쿠키와 헤더가 모두 있을 때 쿠키를 우선한다")
+        @Test
+        void 내_정보_조회_우선순위_쿠키() {
+            // 유저1 토큰 (쿠키용)
+            String cookieToken = RestAssured
+                    .given()
+                    .body(new TokenRequestDto(SAMPLE_LOGIN_ID, SAMPLE_PASSWORD))
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .when().post("/login")
+                    .then().extract().cookie("token");
+
+            // 유저2 토큰 (헤더용)
+            String headerToken = RestAssured
+                    .given()
+                    .header("User-Agent", "RoomescapeApp")
+                    .body(new TokenRequestDto("user2@email.com", "password"))
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .when().post("/login")
+                    .then().extract().as(TokenResponseDto.class).accessToken();
+
+            // 쿠키와 헤더를 동시에 보냄 -> 쿠키 소유자(유저1)가 나와야 함
+            MemberResponse member = RestAssured
+                    .given().log().all()
+                    .cookie("token", cookieToken)
+                    .header("Authorization", "Bearer " + headerToken)
+                    .when().get("/members/me")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value()).extract().as(MemberResponse.class);
+
+            assertThat(member.name()).isEqualTo(SAMPLE_NAME); // 유저1
         }
 
         @DisplayName("토큰 없이 내 정보를 조회하면 401 Unauthorized를 응답한다")

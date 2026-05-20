@@ -38,14 +38,18 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        String token = authorizationExtractor.extract(request);
+        String token = null;
 
-        if (token == null && request.getCookies() != null) {
+        if (request.getCookies() != null) {
             token = Arrays.stream(request.getCookies())
                     .filter(cookie -> "token".equals(cookie.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);
+        }
+
+        if (token == null) {
+            token = authorizationExtractor.extract(request);
         }
 
         return authService.findMemberByToken(token);
