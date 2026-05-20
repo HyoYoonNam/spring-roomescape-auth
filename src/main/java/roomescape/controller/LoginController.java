@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.AuthResponse;
 import roomescape.annotation.Login;
 import roomescape.dto.LoginMember;
+import roomescape.dto.LogoutResponseDto;
 import roomescape.dto.MemberResponse;
 import roomescape.dto.TokenRequestDto;
 import roomescape.dto.TokenResponseDto;
@@ -38,6 +39,12 @@ public class LoginController {
     @PostMapping("/login")
     public TokenResponseDto tokenLogin(@RequestBody TokenRequestDto tokenRequest) {
         return authService.createToken(tokenRequest);
+    }
+
+    @AuthResponse
+    @PostMapping("/logout")
+    public LogoutResponseDto logout() {
+        return new LogoutResponseDto();
     }
 
     @GetMapping("/members/me")

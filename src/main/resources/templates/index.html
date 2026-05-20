@@ -79,8 +79,8 @@
       `;
       document.getElementById('logout-link').addEventListener('click', (e) => {
         e.preventDefault();
-        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        location.reload();
+        fetch('/logout', { method: 'POST' })
+        .then(() => location.reload());
       });
     } else {
       authLinks.innerHTML = `

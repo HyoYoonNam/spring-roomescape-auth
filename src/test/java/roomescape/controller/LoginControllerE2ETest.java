@@ -83,6 +83,32 @@ class LoginControllerE2ETest {
                     .then().log().all()
                     .statusCode(401);
         }
+
+        @DisplayName("로그아웃하면 웹 브라우저의 쿠키를 삭제한다")
+        @Test
+        void 로그아웃_웹() {
+            Response response = RestAssured
+                    .given().log().all()
+                    .when().post("/logout");
+
+            response.then().log().all()
+                    .statusCode(200)
+                    .cookie("token", is(""));
+
+            String setCookieHeader = response.getHeader(HttpHeaders.SET_COOKIE);
+            assertThat(setCookieHeader).contains("Max-Age=0");
+        }
+
+        @DisplayName("모바일 앱에서 로그아웃하면 200 OK를 응답한다")
+        @Test
+        void 로그아웃_모바일() {
+            RestAssured
+                    .given().log().all()
+                    .header("User-Agent", "RoomescapeApp")
+                    .when().post("/logout")
+                    .then().log().all()
+                    .statusCode(200);
+        }
     }
 
     @Nested

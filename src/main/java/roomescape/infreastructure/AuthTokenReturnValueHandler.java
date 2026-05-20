@@ -12,6 +12,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.annotation.AuthResponse;
+import roomescape.dto.LogoutResponseDto;
 import roomescape.dto.TokenResponseDto;
 
 @Component
@@ -26,7 +27,8 @@ public class AuthTokenReturnValueHandler implements HandlerMethodReturnValueHand
     @Override
     public boolean supportsReturnType(MethodParameter returnType) {
         return returnType.hasMethodAnnotation(AuthResponse.class) &&
-                returnType.getParameterType().equals(TokenResponseDto.class);
+                (returnType.getParameterType().equals(TokenResponseDto.class) ||
+                        returnType.getParameterType().equals(LogoutResponseDto.class));
     }
 
     @Override
@@ -41,8 +43,16 @@ public class AuthTokenReturnValueHandler implements HandlerMethodReturnValueHand
         HttpServletResponse response = (HttpServletResponse) webRequest.getNativeResponse();
 
         ClientType clientType = (ClientType) request.getAttribute(ClientTypeInterceptor.CLIENT_TYPE_ATTRIBUTE);
-        TokenResponseDto tokenResponse = (TokenResponseDto) returnValue;
 
+        if (returnValue instanceof TokenResponseDto tokenResponse) {
+            handleLoginResponse(response, clientType, tokenResponse);
+        } else if (returnValue instanceof LogoutResponseDto logoutResponse) {
+            handleLogoutResponse(response, clientType, logoutResponse);
+        }
+    }
+
+    private void handleLoginResponse(HttpServletResponse response, ClientType clientType, TokenResponseDto tokenResponse)
+            throws IOException {
         if (clientType == ClientType.MOBILE) {
             response.setContentType("application/json");
             response.getWriter().write(objectMapper.writeValueAsString(tokenResponse));
@@ -53,6 +63,23 @@ public class AuthTokenReturnValueHandler implements HandlerMethodReturnValueHand
                 .httpOnly(true)
                 .path("/")
                 .maxAge(3600)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private void handleLogoutResponse(HttpServletResponse response, ClientType clientType, LogoutResponseDto logoutResponse)
+            throws IOException {
+        if (clientType == ClientType.MOBILE) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+
+        ResponseCookie cookie = ResponseCookie.from("token", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
