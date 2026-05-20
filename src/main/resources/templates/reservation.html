@@ -138,18 +138,8 @@
   let selectedTimeId = null;
   let allTimes = [];
 
-  function getAuthToken() {
-    const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
-    return match ? match[2] : null;
-  }
-
   function getAuthHeaders() {
-    const token = getAuthToken();
-    const headers = { 'Content-Type': 'application/json' };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
+    return { 'Content-Type': 'application/json' };
   }
 
   document.addEventListener('DOMContentLoaded', () => {

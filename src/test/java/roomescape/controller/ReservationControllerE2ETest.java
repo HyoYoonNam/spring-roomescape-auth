@@ -35,6 +35,7 @@ class ReservationControllerE2ETest {
         if (accessToken != null) return accessToken;
 
         accessToken = RestAssured.given()
+                .header("User-Agent", "RoomescapeApp")
                 .contentType(ContentType.JSON)
                 .body(new TokenRequestDto("sample@sample.com", "samplePassword"))
                 .when().post("/login")

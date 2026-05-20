@@ -104,16 +104,11 @@
         })
         .then(response => {
             if (response.ok) {
-                return response.json();
+                // 로그인 성공 시 메인 페이지로 이동 (서버에서 Set-Cookie로 토큰을 내려줌)
+                window.location.href = '/';
             } else {
                 throw new Error('Login failed');
             }
-        })
-        .then(data => {
-            // 토큰을 쿠키에 저장 (브라우저 종료 시 삭제되도록 설정하거나 만료 시간 설정 가능)
-            document.cookie = `token=${data.accessToken}; path=/; max-age=3600`;
-            // 로그인 성공 시 메인 페이지로 이동
-            window.location.href = '/';
         })
         .catch(error => {
             errorMsg.style.display = 'block';

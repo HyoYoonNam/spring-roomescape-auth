@@ -167,18 +167,8 @@
   let currentEditingId = null;
   let allTimes = [];
 
-  function getAuthToken() {
-    const match = document.cookie.match(new RegExp('(^| )token=([^;]+)'));
-    return match ? match[2] : null;
-  }
-
   function getAuthHeaders() {
-    const token = getAuthToken();
-    const headers = { 'Content-Type': 'application/json' };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
+    return { 'Content-Type': 'application/json' };
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -187,8 +177,9 @@
     .then(res => res.json())
     .then(times => { allTimes = times; });
 
-    // 로그인 상태가 아니면 로그인 페이지로 리다이렉트 (선택 사항)
-    if (!getAuthToken()) {
+    // 로그인 상태가 아니면 로그인 페이지로 리다이렉트
+    const hasTokenCookie = document.cookie.split('; ').some(row => row.startsWith('token='));
+    if (!hasTokenCookie) {
         alert('로그인이 필요한 서비스입니다.');
         location.href = '/login';
         return;

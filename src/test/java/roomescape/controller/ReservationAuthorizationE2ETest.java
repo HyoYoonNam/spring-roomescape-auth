@@ -19,6 +19,7 @@ class ReservationAuthorizationE2ETest {
 
     private String getAccessToken(String email, String password) {
         return RestAssured.given()
+                .header("User-Agent", "RoomescapeApp")
                 .contentType(ContentType.JSON)
                 .body(new TokenRequestDto(email, password))
                 .when().post("/login")

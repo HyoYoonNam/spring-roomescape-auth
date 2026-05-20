@@ -1,9 +1,12 @@
 package roomescape.controller;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.Login;
 import roomescape.dto.LoginMember;
@@ -34,11 +37,28 @@ public class LoginController {
      * }
      */
     @PostMapping("/login")
-    public ResponseEntity<TokenResponseDto> tokenLogin(@RequestBody TokenRequestDto tokenRequest) {
+    public ResponseEntity<TokenResponseDto> tokenLogin(
+            @RequestBody TokenRequestDto tokenRequest,
+            @RequestHeader(value = "User-Agent", defaultValue = "") String userAgent
+    ) {
         TokenResponseDto tokenResponse = authService.createToken(tokenRequest);
+
+        if (userAgent.contains("RoomescapeApp")) {
+            return ResponseEntity
+                    .ok()
+                    .body(tokenResponse);
+        }
+
+        ResponseCookie cookie = ResponseCookie.from("token", tokenResponse.accessToken())
+                .httpOnly(true)
+                .path("/")
+                .maxAge(3600)
+                .build();
+
         return ResponseEntity
                 .ok()
-                .body(tokenResponse);
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build();
     }
 
     @GetMapping("/members/me")
