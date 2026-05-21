@@ -1,4 +1,4 @@
-package roomescape.infreastructure;
+package roomescape.infraastructure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

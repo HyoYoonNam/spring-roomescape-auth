@@ -1,4 +1,4 @@
-package roomescape.infreastructure;
+package roomescape.infraastructure;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Enumeration;

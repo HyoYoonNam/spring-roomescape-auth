@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.infreastructure.LoginInterceptor;
+import roomescape.infraastructure.LoginInterceptor;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -28,10 +28,10 @@ class GlobalExceptionHandlerTest {
     private LoginInterceptor loginInterceptor;
 
     @MockitoBean
-    private roomescape.infreastructure.AdminInterceptor adminInterceptor;
+    private roomescape.infraastructure.AdminInterceptor adminInterceptor;
 
     @MockitoBean
-    private roomescape.infreastructure.LoginMemberArgumentResolver loginMemberArgumentResolver;
+    private roomescape.infraastructure.LoginMemberArgumentResolver loginMemberArgumentResolver;
 
     @org.junit.jupiter.api.BeforeEach
     void setUp() throws Exception {

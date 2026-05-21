@@ -28,13 +28,13 @@ class BusinessExceptionHandlerTest {
     private TestController testController;
 
     @MockitoBean
-    private roomescape.infreastructure.LoginInterceptor loginInterceptor;
+    private roomescape.infraastructure.LoginInterceptor loginInterceptor;
 
     @MockitoBean
-    private roomescape.infreastructure.AdminInterceptor adminInterceptor;
+    private roomescape.infraastructure.AdminInterceptor adminInterceptor;
 
     @MockitoBean
-    private roomescape.infreastructure.LoginMemberArgumentResolver loginMemberArgumentResolver;
+    private roomescape.infraastructure.LoginMemberArgumentResolver loginMemberArgumentResolver;
 
     @org.junit.jupiter.api.BeforeEach
     void setUp() throws Exception {

@@ -1,4 +1,4 @@
-package roomescape.infreastructure;
+package roomescape.infraastructure;
 
 import java.util.ArrayList;
 import java.util.List;

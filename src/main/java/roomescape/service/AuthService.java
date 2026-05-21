@@ -5,7 +5,7 @@ import roomescape.domain.Member;
 import roomescape.dto.TokenRequestDto;
 import roomescape.dto.TokenResponseDto;
 import roomescape.exception.AuthorizationException;
-import roomescape.infreastructure.JwtTokenProvider;
+import roomescape.infraastructure.JwtTokenProvider;
 import roomescape.repository.MemberRepository;
 
 @Service
