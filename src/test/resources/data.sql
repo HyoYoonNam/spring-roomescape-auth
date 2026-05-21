@@ -1,9 +1,21 @@
--- 0. 회원 데이터
-INSERT INTO member (id, login_id, name, password)
-VALUES (1, 'sample@sample.com', '루드비코', 'samplePassword'),
-       (2, 'brown@email.com', '브라운', 'password'),
-       (3, 'json@email.com', '제이슨', 'password'),
-       (4, 'neo@email.com', '네오', 'password');
+-- 0. 회원 데이터 (역할 추가: USER, MANAGER)
+INSERT INTO member (id, login_id, name, password, role)
+VALUES (1, 'sample@sample.com', '루드비코', 'samplePassword', 'USER'),
+       (2, 'brown@email.com', '브라운', 'password', 'USER'),
+       (3, 'json@email.com', '제이슨', 'password', 'USER'),
+       (4, 'neo@email.com', '네오', 'password', 'USER'),
+       (5, 'admin@roomescape.com', '어드민', 'adminPassword', 'MANAGER'),
+       (6, 'manager1@store.com', '매니저1', 'managerPassword', 'MANAGER');
+
+-- 0.5 매장 데이터
+INSERT INTO store (id, name)
+VALUES (1, '잠실점'),
+       (2, '강남점');
+
+-- 0.6 매장 매니저 매핑
+INSERT INTO manager_store (member_id, store_id)
+VALUES (5, 1), (5, 2), -- 어드민은 두 곳 관리
+       (6, 1);         -- 매니저1은 잠실점 관리
 
 -- 1. 테마 데이터 (총 12개)
 INSERT INTO theme (id, name, description, image_url, running_time)
@@ -29,38 +41,38 @@ VALUES (1, '10:00'),
        (5, '14:00'),
        (6, '15:00');
 
--- 3. 예약 데이터 (오늘 기준 최근 7일 이내로 동적 할당)
+-- 3. 예약 데이터 (오늘 기준 최근 7일 이내로 동적 할당, 매장 연결)
 -- 1, 2, 3, 4.
-INSERT INTO reservation (id, member_id, date, time_id, theme_id)
+INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
 VALUES
-    -- 루드비코 (member_id: 1) - 6건
-    (1, 1, DATEADD('DAY', -7, CURRENT_DATE), 1, 1),
-    (2, 1, DATEADD('DAY', -6, CURRENT_DATE), 2, 1),
-    (3, 1, DATEADD('DAY', -5, CURRENT_DATE), 3, 1),
-    (4, 1, DATEADD('DAY', -4, CURRENT_DATE), 4, 1),
-    (5, 1, DATEADD('DAY', -3, CURRENT_DATE), 1, 1),
-    (6, 1, DATEADD('DAY', 1, CURRENT_DATE), 1, 1),
+    -- 루드비코 (member_id: 1, 잠실점: 1) - 6건
+    (1, 1, DATEADD('DAY', -7, CURRENT_DATE), 1, 1, 1),
+    (2, 1, DATEADD('DAY', -6, CURRENT_DATE), 2, 1, 1),
+    (3, 1, DATEADD('DAY', -5, CURRENT_DATE), 3, 1, 1),
+    (4, 1, DATEADD('DAY', -4, CURRENT_DATE), 4, 1, 1),
+    (5, 1, DATEADD('DAY', -3, CURRENT_DATE), 1, 1, 1),
+    (6, 1, DATEADD('DAY', 1, CURRENT_DATE), 1, 1, 1),
 
-    -- 브라운 (member_id: 2)
-    (7, 2, DATEADD('DAY', -6, CURRENT_DATE), 2, 2),
-    (8, 2, DATEADD('DAY', -5, CURRENT_DATE), 3, 2),
-    (9, 2, DATEADD('DAY', -4, CURRENT_DATE), 4, 2),
-    (10, 2, DATEADD('DAY', -3, CURRENT_DATE), 1, 3),
-    (11, 2, DATEADD('DAY', -2, CURRENT_DATE), 2, 3),
-    (12, 2, DATEADD('DAY', -2, CURRENT_DATE), 3, 3),
+    -- 브라운 (member_id: 2, 잠실점: 1)
+    (7, 2, DATEADD('DAY', -6, CURRENT_DATE), 2, 2, 1),
+    (8, 2, DATEADD('DAY', -5, CURRENT_DATE), 3, 2, 1),
+    (9, 2, DATEADD('DAY', -4, CURRENT_DATE), 4, 2, 1),
+    (10, 2, DATEADD('DAY', -3, CURRENT_DATE), 1, 3, 1),
+    (11, 2, DATEADD('DAY', -2, CURRENT_DATE), 2, 3, 1),
+    (12, 2, DATEADD('DAY', -2, CURRENT_DATE), 3, 3, 1),
 
-    -- 제이슨 (member_id: 3)
-    (13, 3, DATEADD('DAY', -7, CURRENT_DATE), 1, 4),
-    (14, 3, DATEADD('DAY', -6, CURRENT_DATE), 2, 4),
-    (15, 3, DATEADD('DAY', -5, CURRENT_DATE), 1, 5),
-    (16, 3, DATEADD('DAY', -4, CURRENT_DATE), 2, 5),
-    (17, 3, DATEADD('DAY', -3, CURRENT_DATE), 1, 6),
-    (18, 3, DATEADD('DAY', -2, CURRENT_DATE), 2, 6),
+    -- 제이슨 (member_id: 3, 잠실점: 1)
+    (13, 3, DATEADD('DAY', -7, CURRENT_DATE), 1, 4, 1),
+    (14, 3, DATEADD('DAY', -6, CURRENT_DATE), 2, 4, 1),
+    (15, 3, DATEADD('DAY', -5, CURRENT_DATE), 1, 5, 1),
+    (16, 3, DATEADD('DAY', -4, CURRENT_DATE), 2, 5, 1),
+    (17, 3, DATEADD('DAY', -3, CURRENT_DATE), 1, 6, 1),
+    (18, 3, DATEADD('DAY', -2, CURRENT_DATE), 2, 6, 1),
 
-    -- 네오 (member_id: 4)
-    (19, 4, DATEADD('DAY', -2, CURRENT_DATE), 1, 7),
-    (20, 4, DATEADD('DAY', -7, CURRENT_DATE), 2, 8),
-    (21, 4, DATEADD('DAY', -15, CURRENT_DATE), 1, 11),
-    (22, 4, CURRENT_DATE, 2, 11),
-    (23, 1, DATEADD('DAY', 1, CURRENT_DATE), 1, 2),
-    (24, 1, DATEADD('DAY', 2, CURRENT_DATE), 1, 2);
+    -- 네오 (member_id: 4, 강남점: 2)
+    (19, 4, DATEADD('DAY', -2, CURRENT_DATE), 1, 7, 2),
+    (20, 4, DATEADD('DAY', -7, CURRENT_DATE), 2, 8, 2),
+    (21, 4, DATEADD('DAY', -15, CURRENT_DATE), 1, 11, 2),
+    (22, 4, CURRENT_DATE, 2, 11, 2),
+    (23, 1, DATEADD('DAY', 1, CURRENT_DATE), 1, 2, 1),
+    (24, 1, DATEADD('DAY', 2, CURRENT_DATE), 1, 2, 1);

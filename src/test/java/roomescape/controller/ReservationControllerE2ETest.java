@@ -61,7 +61,8 @@ class ReservationControllerE2ETest {
             Map<String, Object> requestBody = Map.of(
                     "date", FUTURE_DATE,
                     "timeId", 1,
-                    "themeId", 1
+                    "themeId", 1,
+                    "storeId", 1
             );
 
             RestAssured.given().log().all()
@@ -119,7 +120,8 @@ class ReservationControllerE2ETest {
             Map<String, Object> requestBody = Map.of(
                     "date", FUTURE_DATE,
                     "timeId", 1,
-                    "themeId", 1
+                    "themeId", 1,
+                    "storeId", 1
             );
 
             // when
@@ -134,6 +136,7 @@ class ReservationControllerE2ETest {
                     .statusCode(201);
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .when().get("/admin" + response.getHeader(HttpHeaders.LOCATION))
                     .then().log().all()
                     .statusCode(200)
@@ -143,6 +146,15 @@ class ReservationControllerE2ETest {
                     .body("theme.id", is(1));
         }
 
+        private String getAdminToken() {
+            return RestAssured.given()
+                    .header("User-Agent", "RoomescapeApp")
+                    .contentType(ContentType.JSON)
+                    .body(Map.of("loginId", "admin@roomescape.com", "password", "adminPassword"))
+                    .when().post("/login")
+                    .then().extract().path("accessToken");
+        }
+
         @DisplayName("지난 시점으로 예약하면 422 Unprocessable Entity를 응답한다")
         @Sql("/initialize_theme_and_time.sql")
         @Test
@@ -150,7 +162,8 @@ class ReservationControllerE2ETest {
             Map<String, Object> requestBodyWithPastDateTime = Map.of(
                     "date", PAST_DATE,
                     "timeId", 1,
-                    "themeId", 1
+                    "themeId", 1,
+                    "storeId", 1
             );
 
             RestAssured.given().log().all()
@@ -203,7 +216,8 @@ class ReservationControllerE2ETest {
             Map<String, Object> requestBodyWithDuplicatedReservation = Map.of(
                     "date", FUTURE_DATE,
                     "timeId", 1,
-                    "themeId", 1
+                    "themeId", 1,
+                    "storeId", 1
             );
 
             RestAssured.given().log().all()
@@ -231,7 +245,8 @@ class ReservationControllerE2ETest {
             Map<String, Object> requestBodyWithIllegalDateFormat = Map.of(
                     "date", FUTURE_DATE.format(DateTimeFormatter.ofPattern(illegalDateFormat)),
                     "timeId", 1,
-                    "themeId", 1
+                    "themeId", 1,
+                    "storeId", 1
             );
 
             RestAssured.given().log().all()
@@ -245,9 +260,10 @@ class ReservationControllerE2ETest {
 
         private static Stream<Arguments> provideInvalidReservationRequests() {
             return Stream.of(
-                    Arguments.of("date 누락", Map.of("timeId", 1, "themeId", 1)),
-                    Arguments.of("timeId 누락", Map.of("date", FUTURE_DATE, "themeId", 1)),
-                    Arguments.of("themeId 누락", Map.of("date", FUTURE_DATE, "timeId", 1))
+                    Arguments.of("date 누락", Map.of("timeId", 1, "themeId", 1, "storeId", 1)),
+                    Arguments.of("timeId 누락", Map.of("date", FUTURE_DATE, "themeId", 1, "storeId", 1)),
+                    Arguments.of("themeId 누락", Map.of("date", FUTURE_DATE, "timeId", 1, "storeId", 1)),
+                    Arguments.of("storeId 누락", Map.of("date", FUTURE_DATE, "timeId", 1, "themeId", 1))
             );
         }
     }
@@ -281,6 +297,7 @@ class ReservationControllerE2ETest {
                     .queryParam("date", LocalDate.now().plusDays(1).toString())
                     .queryParam("timeId", 1)
                     .queryParam("themeId", 1)
+                    .queryParam("storeId", 1)
                     .when().delete("/api/reservations")
                     .then().log().all()
                     .statusCode(204);
@@ -295,6 +312,7 @@ class ReservationControllerE2ETest {
                     .queryParam("date", LocalDate.now().minusDays(7).toString())
                     .queryParam("timeId", 1)
                     .queryParam("themeId", 1)
+                    .queryParam("storeId", 1)
                     .when().delete("/api/reservations")
                     .then().log().all()
                     .statusCode(422);
@@ -309,6 +327,7 @@ class ReservationControllerE2ETest {
                     .queryParam("date", LocalDate.now().plusDays(1).toString())
                     .queryParam("timeId", Long.MAX_VALUE)
                     .queryParam("themeId", Long.MAX_VALUE)
+                    .queryParam("storeId", 1)
                     .when().delete("/api/reservations")
                     .then().log().all()
                     .statusCode(422);

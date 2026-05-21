@@ -3,9 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -56,7 +54,12 @@ public class JdbcThemeRepository implements ThemeRepository {
 
         return jdbcTemplate.query(
                 sql,
-                getThemeRowMapper()
+                (rs, rowNum) -> new Theme(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getString("image_url")
+                )
         );
     }
 
@@ -66,7 +69,12 @@ public class JdbcThemeRepository implements ThemeRepository {
 
         List<Theme> themes = jdbcTemplate.query(
                 sql,
-                getThemeRowMapper(),
+                (rs, rowNum) -> new Theme(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getString("image_url")
+                ),
                 id
         );
         return themes.stream()
@@ -80,7 +88,12 @@ public class JdbcThemeRepository implements ThemeRepository {
 
         return jdbcTemplate.query(
                 FIND_POPULAR_THEMES,
-                getThemeRowMapper(),
+                (rs, rowNum) -> new Theme(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getString("description"),
+                        rs.getString("image_url")
+                ),
                 beforeOneWeeks, today
         );
     }
@@ -88,10 +101,6 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM theme WHERE id=?", id);
-    }
-
-    private static RowMapper<Theme> getThemeRowMapper() {
-        return new DataClassRowMapper<>(Theme.class);
     }
 }
 

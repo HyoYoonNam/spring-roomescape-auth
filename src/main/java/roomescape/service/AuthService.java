@@ -38,14 +38,18 @@ public class AuthService {
             throw new AuthorizationException();
         }
 
-        String accessToken = jwtTokenProvider.createToken(tokenRequestDto.loginId());
+        Member member = memberRepository.findByLoginId(tokenRequestDto.loginId())
+                .orElseThrow(AuthorizationException::new);
+
+        String accessToken = jwtTokenProvider.createToken(member.getLoginId(), member.getRole().name());
         return new TokenResponseDto(accessToken);
     }
 
     public LoginMember findMemberByToken(String token) {
         String loginId = jwtTokenProvider.getPayload(token);
+        Member.Role role = Member.Role.valueOf(jwtTokenProvider.getRole(token));
         Member member = memberRepository.findByLoginId(loginId)
-                .orElseThrow(() -> new AuthorizationException());
-        return new LoginMember(member.getId(), member.getName(), member.getLoginId());
+                .orElseThrow(AuthorizationException::new);
+        return new LoginMember(member.getId(), member.getName(), member.getLoginId(), role);
     }
 }

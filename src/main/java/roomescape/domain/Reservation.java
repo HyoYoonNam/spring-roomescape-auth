@@ -10,18 +10,20 @@ public class Reservation {
     private LocalDate date;
     private ReservationTime time;
     private final Theme theme;
+    private final Long storeId;
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
-        validate(member, date, time, theme);
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, Long storeId) {
+        validate(member, date, time, theme, storeId);
         this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.storeId = storeId;
     }
 
-    public static Reservation withoutId(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, member, date, time, theme);
+    public static Reservation withoutId(Member member, LocalDate date, ReservationTime time, Theme theme, Long storeId) {
+        return new Reservation(null, member, date, time, theme, storeId);
     }
 
     public void changeDateAndTime(LocalDate date, ReservationTime time) {
@@ -55,6 +57,10 @@ public class Reservation {
         return theme;
     }
 
+    public Long getStoreId() {
+        return storeId;
+    }
+
     public LocalDateTime getDateTime() {
         return LocalDateTime.of(date, time.getStartAt());
     }
@@ -75,14 +81,16 @@ public class Reservation {
                 ", date=" + date +
                 ", time=" + time +
                 ", theme=" + theme +
+                ", storeId=" + storeId +
                 '}';
     }
 
-    private void validate(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    private void validate(Member member, LocalDate date, ReservationTime time, Theme theme, Long storeId) {
         validateMember(member);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
+        validateStoreId(storeId);
     }
 
     private void validateMember(Member member) {
@@ -106,6 +114,12 @@ public class Reservation {
     private void validateTheme(Theme theme) {
         if (theme == null) {
             throw new IllegalArgumentException("테마는 필수입니다.");
+        }
+    }
+
+    private void validateStoreId(Long storeId) {
+        if (storeId == null) {
+            throw new IllegalArgumentException("매장 정보는 필수입니다.");
         }
     }
 }

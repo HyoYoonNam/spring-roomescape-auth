@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -23,31 +22,34 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String FIND_RESERVATION_BY_ID = """
                 SELECT
                     r.id AS reservation_id,
-                    m.id AS member_id, m.login_id, m.name AS member_name, m.password,
+                    m.id AS member_id, m.login_id, m.name AS member_name, m.password, m.role,
                     r.date, 
+                    r.store_id,
                     t.id AS reservation_time_id,
                     t.start_at AS time_value,
                     th.id AS reservation_theme_id,
                     th.name AS reservation_theme_name,
                     th.description AS reservation_theme_description,
                     th.image_url AS reservation_theme_image_url
-            
+
                 FROM reservation AS r 
                 INNER JOIN member AS m
                 ON r.member_id = m.id
 
                 INNER JOIN reservation_time AS t
-                ON r.time_id = t.id 
-            
+                ON r.time_id = t.id
+
                 INNER JOIN theme AS th
                 ON r.theme_id = th.id
-            
+
                 WHERE r.id = ?
             """;
+
     private static final String FIND_ALL_RESERVATIONS = """
                 SELECT r.id AS reservation_id,
-                m.id AS member_id, m.login_id, m.name AS member_name, m.password,
+                m.id AS member_id, m.login_id, m.name AS member_name, m.password, m.role,
                 r.date,
+                r.store_id,
                 t.id AS reservation_time_id,
                 t.start_at AS time_value,
                 th.id AS reservation_theme_id,
@@ -67,8 +69,9 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
     private static final String FIND_ALL_RESERVATIONS_BY_USERNAME = """
                 SELECT r.id AS reservation_id,
-                m.id AS member_id, m.login_id, m.name AS member_name, m.password,
+                m.id AS member_id, m.login_id, m.name AS member_name, m.password, m.role,
                 r.date,
+                r.store_id,
                 t.id AS reservation_time_id,
                 t.start_at AS time_value,
                 th.id AS reservation_theme_id,
@@ -91,8 +94,9 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private static final String FIND_ALL_RESERVATIONS_BY_LOGIN_ID = """
                 SELECT r.id AS reservation_id,
-                m.id AS member_id, m.login_id, m.name AS member_name, m.password,
+                m.id AS member_id, m.login_id, m.name AS member_name, m.password, m.role,
                 r.date,
+                r.store_id,
                 t.id AS reservation_time_id,
                 t.start_at AS time_value,
                 th.id AS reservation_theme_id,
@@ -131,7 +135,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("member_id", reservation.getMember().getId())
                 .addValue("date", reservation.getDate())
                 .addValue("time_id", reservation.getTimeId())
-                .addValue("theme_id", reservation.getThemeId());
+                .addValue("theme_id", reservation.getThemeId())
+                .addValue("store_id", reservation.getStoreId());
 
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(parameterSource).longValue();
 
@@ -140,7 +145,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getMember(),
                 reservation.getDate(),
                 reservation.getTime(),
-                reservation.getTheme()
+                reservation.getTheme(),
+                reservation.getStoreId()
         );
     }
 
@@ -275,7 +281,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getLong("member_id"),
                     resultSet.getString("login_id"),
                     resultSet.getString("member_name"),
-                    resultSet.getString("password")
+                    resultSet.getString("password"),
+                    Member.Role.valueOf(resultSet.getString("role"))
             );
 
             ReservationTime time = new ReservationTime(
@@ -294,7 +301,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     member,
                     resultSet.getObject("date", LocalDate.class),
                     time,
-                    theme
+                    theme,
+                    resultSet.getLong("store_id")
             );
         };
     }

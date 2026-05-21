@@ -17,8 +17,10 @@ class MemberTest {
         assertThatThrownBy(() -> Member.withoutId(
                 emptyLoginId,
                 "루드비코",
-                "password"
-        )).isExactlyInstanceOf(IllegalArgumentException.class);
+                "password",
+                Member.Role.USER
+        ))
+.isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("이름이 비어 있는 회원은 생성할 수 없다")
@@ -29,8 +31,10 @@ class MemberTest {
         assertThatThrownBy(() -> Member.withoutId(
                 "loginId",
                 emptyName,
-                "password"
-        )).isExactlyInstanceOf(IllegalArgumentException.class);
+                "password",
+                Member.Role.USER
+        ))
+.isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
     @DisplayName("비밀번호가 비어 있는 회원은 생성할 수 없다")
@@ -41,7 +45,9 @@ class MemberTest {
         assertThatThrownBy(() -> Member.withoutId(
                 "loginId",
                 "루드비코",
-                emptyPassword
-        )).isExactlyInstanceOf(IllegalArgumentException.class);
+                emptyPassword,
+                Member.Role.USER
+        ))
+.isExactlyInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -57,6 +57,7 @@ class ReservationAuthorizationE2ETest {
                 .queryParam("date", LocalDate.now().plusDays(1).toString())
                 .queryParam("timeId", 1)
                 .queryParam("themeId", 1)
+                .queryParam("storeId", 1)
                 .when().delete("/api/reservations")
                 .then().log().all()
                 .statusCode(403);

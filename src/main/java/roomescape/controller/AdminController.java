@@ -39,13 +39,13 @@ public class AdminController {
     }
 
     @GetMapping("/reservations")
-    public List<ReservationResponseDto> readAll() {
-        return reservationService.readAllReservation();
+    public List<ReservationResponseDto> readAll(@roomescape.annotation.Login roomescape.dto.LoginMember loginMember) {
+        return reservationService.readAllReservation(loginMember);
     }
 
     @GetMapping("/reservations/{id}")
-    public ReservationResponseDto findReservationById(@PathVariable Long id) {
-        return reservationService.findById(id);
+    public ReservationResponseDto findReservationById(@roomescape.annotation.Login roomescape.dto.LoginMember loginMember, @PathVariable Long id) {
+        return reservationService.findById(id, loginMember);
     }
 
     @PostMapping("/times")

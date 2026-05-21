@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Import({JdbcThemeRepository.class,
         JdbcReservationRepository.class,
         ThemeService.class})
+@Sql("/store.sql")
 class ThemeServiceTest {
 
     @Autowired
@@ -60,10 +61,12 @@ class ThemeServiceTest {
     void 존재하는_모든_테마의_ThemeResponseDTO가_담긴_리스트를_리턴한다() {
         // given
         ThemeResponseDTO addedSampleATheme = themeService.addTheme(
-                new ThemeRequestDTO("sample a theme", "샘플 테마입니다", "example.com")
+                new ThemeRequestDTO("sample theme", "샘플 테마입니다", "example.com")
+
         );
         ThemeResponseDTO addedSampleBTheme = themeService.addTheme(
-                new ThemeRequestDTO("sample b theme", "샘플 테마입니다", "example.com")
+                new ThemeRequestDTO("sample theme", "샘플 테마입니다", "example.com")
+
         );
 
         // when
@@ -80,6 +83,7 @@ class ThemeServiceTest {
     void 테마의_id로_테마를_조회한다() {
         ThemeResponseDTO addedTheme = themeService.addTheme(
                 new ThemeRequestDTO("sample theme", "샘플 테마입니다", "example.com")
+
         );
 
         ThemeResponseDTO foundTheme = themeService.findById(addedTheme.id());
@@ -106,6 +110,7 @@ class ThemeServiceTest {
     void 테마의_id로_테마를_삭제한다() {
         ThemeResponseDTO addedTheme = themeService.addTheme(
                 new ThemeRequestDTO("sample theme", "샘플 테마입니다", "example.com")
+
         );
 
         themeService.deleteTheme(addedTheme.id());

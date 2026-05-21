@@ -22,6 +22,15 @@ import org.springframework.test.context.jdbc.Sql;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class AdminControllerE2ETest {
 
+    private String getAdminToken() {
+        return RestAssured.given()
+                .header("User-Agent", "RoomescapeApp")
+                .contentType(ContentType.JSON)
+                .body(Map.of("loginId", "admin@roomescape.com", "password", "adminPassword"))
+                .when().post("/login")
+                .then().extract().path("accessToken");
+    }
+
     @Nested
     class 예약_조회_케이스 {
 
@@ -30,10 +39,11 @@ class AdminControllerE2ETest {
         @Test
         void 모든_예약을_조회한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .when().get("/admin/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(24));
+                    .body("size()", is(24)); // data.sql의 전체 예약 개수 (어드민은 모든 매장 관리하므로 다 보임)
         }
 
         @DisplayName("예약 ID로 상세 정보를 조회한다")
@@ -41,6 +51,7 @@ class AdminControllerE2ETest {
         @Test
         void 예약_ID로_상세_정보를_조회한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .when().get("/admin/reservations/1")
                     .then().log().all()
                     .statusCode(200)
@@ -49,18 +60,22 @@ class AdminControllerE2ETest {
         }
 
         @DisplayName("존재하지 않는 예약 ID 조회 시 422 Unprocessable Entity를 응답한다")
+        @Sql("/data.sql")
         @Test
         void 존재하지_않는_예약_ID_조회_시_422를_응답한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .when().get("/admin/reservations/" + Long.MAX_VALUE)
                     .then().log().all()
                     .statusCode(422);
         }
 
         @DisplayName("잘못된 형식의 예약 ID 조회 시 400 Bad Request를 응답한다")
+        @Sql("/data.sql")
         @Test
         void 잘못된_형식의_예약_ID_조회_시_400을_응답한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .when().get("/admin/reservations/invalid-id")
                     .then().log().all()
                     .statusCode(400)
@@ -79,6 +94,7 @@ class AdminControllerE2ETest {
             );
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().post("/admin/times")
@@ -92,6 +108,7 @@ class AdminControllerE2ETest {
         @Test
         void 예약_시간_삭제에_성공하면_204를_응답한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .when().delete("/admin/times/1")
                     .then().log().all()
@@ -106,6 +123,7 @@ class AdminControllerE2ETest {
             );
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .body(requestBodyWithIllegalTimeFormat)
                     .when().post("/admin/times")
@@ -118,6 +136,7 @@ class AdminControllerE2ETest {
         @Test
         void 삭제하려는_예약_시간에_대한_예약이_존재한다면_409를_응답한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .when().delete("/admin/times/1")
                     .then().log().all()
@@ -128,6 +147,7 @@ class AdminControllerE2ETest {
         @Test
         void 삭제하려는_예약_시간이_존재하지_않는다면_422를_응답한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .when().delete("/admin/times/1")
                     .then().log().all()
@@ -143,6 +163,7 @@ class AdminControllerE2ETest {
             );
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().post("/admin/times")
@@ -157,6 +178,7 @@ class AdminControllerE2ETest {
             Map<String, String> requestBody = Map.of();
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().post("/admin/times")
@@ -169,15 +191,18 @@ class AdminControllerE2ETest {
     class 테마_생성_삭제_케이스 {
 
         @DisplayName("테마를 생성한다")
+        @Sql("/store.sql")
         @Test
         void 테마_생성에_성공하면_201_Created를_응답한다() {
-            Map<String, String> requestBody = Map.of(
+            Map<String, Object> requestBody = Map.of(
                     "name", "귀신찾기",
                     "description", "귀신을 찾는 테마입니다.",
-                    "imageUrl", "https://image.png"
+                    "imageUrl", "https://image.png",
+                    "storeId", 1
             );
 
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .body(requestBody)
                     .when().post("/admin/themes")
@@ -187,10 +212,12 @@ class AdminControllerE2ETest {
         }
 
         @DisplayName("테마 생성 시 필수 데이터가 누락되면 400 Bad Request를 응답한다")
+        @Sql("/store.sql")
         @ParameterizedTest(name = "{0}")
         @MethodSource("provideInvalidThemeRequests")
         void 테마_생성_시_필수_데이터가_누락되면_400을_응답한다(String description, Map<String, String> invalidRequest) {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .body(invalidRequest)
                     .when().post("/admin/themes")
@@ -200,9 +227,9 @@ class AdminControllerE2ETest {
 
         private static Stream<Arguments> provideInvalidThemeRequests() {
             return Stream.of(
-                    Arguments.of("이름 누락", Map.of("description", "설명", "imageUrl", "https://image.png")),
-                    Arguments.of("설명 누락", Map.of("name", "이름", "imageUrl", "https://image.png")),
-                    Arguments.of("이미지 누락", Map.of("name", "이름", "description", "설명"))
+                    Arguments.of("이름 누락", Map.of("description", "설명", "imageUrl", "https://image.png", "storeId", "1")),
+                    Arguments.of("설명 누락", Map.of("name", "이름", "imageUrl", "https://image.png", "storeId", "1")),
+                    Arguments.of("이미지 누락", Map.of("name", "이름", "description", "설명", "storeId", "1"))
             );
         }
 
@@ -211,6 +238,7 @@ class AdminControllerE2ETest {
         @Test
         void 테마_삭제에_성공하면_204를_응답한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .when().delete("/admin/themes/1")
                     .then().log().all()
@@ -221,6 +249,7 @@ class AdminControllerE2ETest {
         @Test
         void 삭제하려는_테마가_존재하지_않는다면_422를_응답한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .when().delete("/admin/themes/1")
                     .then().log().all()
@@ -232,6 +261,7 @@ class AdminControllerE2ETest {
         @Test
         void 삭제하려는_테마에_대한_예약이_존재한다면_409를_응답한다() {
             RestAssured.given().log().all()
+                    .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
                     .when().delete("/admin/themes/1")
                     .then().log().all()

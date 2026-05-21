@@ -23,6 +23,7 @@ import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.StoreRepository;
 import roomescape.repository.ThemeRepository;
 
 @Service
@@ -33,22 +34,32 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final StoreRepository storeRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            MemberRepository memberRepository
+            MemberRepository memberRepository,
+            StoreRepository storeRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.storeRepository = storeRepository;
     }
 
-    public List<ReservationResponseDto> readAllReservation() {
+    public List<ReservationResponseDto> readAllReservation(LoginMember loginMember) {
+        if (!loginMember.isManager()) {
+            throw new roomescape.exception.ForbiddenException("매니저만 전체 예약을 조회할 수 있습니다.");
+        }
+
+        List<Long> managedStoreIds = storeRepository.findStoreIdsByManagerId(loginMember.id());
+
         return reservationRepository.findAll()
                 .stream()
+                .filter(reservation -> managedStoreIds.contains(reservation.getStoreId()))
                 .map(ReservationResponseDto::from)
                 .toList();
     }
@@ -60,9 +71,12 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponseDto findById(Long id) {
+    public ReservationResponseDto findById(Long id, LoginMember loginMember) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException("ID로 예약 조회 실패: " + id));
+
+        validateAccess(loginMember, reservation);
+
         return ReservationResponseDto.from(reservation);
     }
 
@@ -83,10 +97,16 @@ public class ReservationService {
                 member,
                 reservationRequestDTO.date(),
                 time,
-                theme
+                theme,
+                reservationRequestDTO.storeId()
         );
 
         validateReservationPolicy(reservation);
+
+        // 매니저가 직접 예약하는 경우 (예: 전화 예약 대행), 본인 매장인지 확인
+        if (loginMember.isManager()) {
+            validateManagerStore(loginMember, reservation.getStoreId());
+        }
 
         Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponseDto.from(savedReservation);
@@ -94,7 +114,7 @@ public class ReservationService {
 
     public int update(LoginMember loginMember, Long reservationId, ReservationUpdateDtoDateAndTimeIdOnly updateDto) {
         Reservation reservation = getReservation(reservationId);
-        validateOwner(loginMember, reservation);
+        validateAccess(loginMember, reservation);
         validateModifiable(reservation);
 
         updateState(reservation, updateDto);
@@ -119,9 +139,24 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationNotFoundException("취소할 예약 정보를 찾을 수 없습니다."));
 
         Reservation reservation = getReservation(reservationId);
-        validateOwner(loginMember, reservation);
+        validateAccess(loginMember, reservation);
 
         reservationRepository.deleteById(reservationId);
+    }
+
+    private void validateAccess(LoginMember loginMember, Reservation reservation) {
+        if (loginMember.isManager()) {
+            validateManagerStore(loginMember, reservation.getStoreId());
+            return;
+        }
+        validateOwner(loginMember, reservation);
+    }
+
+    private void validateManagerStore(LoginMember loginMember, Long storeId) {
+        List<Long> managedStoreIds = storeRepository.findStoreIdsByManagerId(loginMember.id());
+        if (!managedStoreIds.contains(storeId)) {
+            throw new roomescape.exception.ForbiddenException("본인 매장의 예약만 관리할 수 있습니다.");
+        }
     }
 
     private void validateOwner(LoginMember loginMember, Reservation reservation) {

@@ -84,7 +84,7 @@ class AuthServiceTest {
         @DisplayName("인증에 성공하면 토큰을 발급한다")
         @Test
         void 토큰_생성을_위한_로그인_인증에_성공하면_토큰을_리턴한다() {
-            Mockito.when(mockJwtTokenProvider.createToken(anyString())).thenReturn("created");
+            Mockito.when(mockJwtTokenProvider.createToken(anyString(), anyString())).thenReturn("created");
             TokenResponseDto created = authService.createToken(new TokenRequestDto(SAMPLE_LOGIN_ID, SAMPLE_PASSWORD));
 
             assertThat(created.accessToken()).isEqualTo("created");
@@ -106,6 +106,7 @@ class AuthServiceTest {
         @Test
         void 유효한_토큰이면_LoginMember를_리턴한다() {
             Mockito.when(mockJwtTokenProvider.getPayload("validToken")).thenReturn(SAMPLE_LOGIN_ID);
+            Mockito.when(mockJwtTokenProvider.getRole("validToken")).thenReturn("USER");
             LoginMember loginMember = authService.findMemberByToken("validToken");
 
             assertThat(loginMember.id()).isEqualTo(1L);
@@ -117,6 +118,7 @@ class AuthServiceTest {
         @Test
         void 존재하지_않는_사용자면_AuthorizationException을_던진다() {
             Mockito.when(mockJwtTokenProvider.getPayload("invalidToken")).thenReturn(NOEXISTS_LOGIN_ID);
+            Mockito.when(mockJwtTokenProvider.getRole("invalidToken")).thenReturn("USER");
 
             assertThatThrownBy(() -> authService.findMemberByToken("invalidToken"))
                     .isExactlyInstanceOf(AuthorizationException.class);
@@ -126,7 +128,7 @@ class AuthServiceTest {
     static class FakeMemberRepository implements MemberRepository {
 
         final Map<String, Member> members = Map.of(
-                SAMPLE_LOGIN_ID, new Member(1L, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD)
+                SAMPLE_LOGIN_ID, new Member(1L, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD, Member.Role.USER)
         );
 
         @Override

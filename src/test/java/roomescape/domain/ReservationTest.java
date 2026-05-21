@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class ReservationTest {
 
-    private final Member member = Member.withoutId("sample@sample.com", "루드비코", "samplePassword");
+    private final Member member = Member.withoutId("sample@sample.com", "루드비코", "samplePassword", Member.Role.USER);
 
     @DisplayName("회원 정보가 없는 예약은 생성할 수 없다")
     @Test
@@ -21,7 +21,8 @@ class ReservationTest {
                         null,
                         LocalDate.now(),
                         ReservationTime.withoutId(LocalTime.now()),
-                        Theme.withoutId("sample theme", "sample description", "sample url")
+                        Theme.withoutId("sample theme", "sample description", "sample url"),
+                        1L
                 )
         ).isExactlyInstanceOf(IllegalArgumentException.class);
     }
@@ -33,7 +34,8 @@ class ReservationTest {
                         member,
                         null,
                         ReservationTime.withoutId(LocalTime.now()),
-                        Theme.withoutId("sample theme", "sample description", "sample url")
+                        Theme.withoutId("sample theme", "sample description", "sample url"),
+                        1L
                 )
         ).isExactlyInstanceOf(IllegalArgumentException.class);
     }
@@ -45,7 +47,8 @@ class ReservationTest {
                         member,
                         LocalDate.now(),
                         null,
-                        Theme.withoutId("sample theme", "sample description", "sample url")
+                        Theme.withoutId("sample theme", "sample description", "sample url"),
+                        1L
                 )
         ).isExactlyInstanceOf(IllegalArgumentException.class);
     }
@@ -57,7 +60,8 @@ class ReservationTest {
                         member,
                         LocalDate.now(),
                         ReservationTime.withoutId(LocalTime.now()),
-                        null
+                        null,
+                        1L
                 )
         ).isExactlyInstanceOf(IllegalArgumentException.class);
     }
@@ -69,7 +73,8 @@ class ReservationTest {
                 member,
                 LocalDate.now(),
                 ReservationTime.withoutId(LocalTime.now()),
-                Theme.withoutId("sample theme", "sample description", "sample url")
+                Theme.withoutId("sample theme", "sample description", "sample url"),
+                1L
         );
 
         assertThatThrownBy(() -> reservation.changeDateAndTime(null, ReservationTime.withoutId(LocalTime.now())))
@@ -83,7 +88,8 @@ class ReservationTest {
                 member,
                 LocalDate.now(),
                 ReservationTime.withoutId(LocalTime.now()),
-                Theme.withoutId("sample theme", "sample description", "sample url")
+                Theme.withoutId("sample theme", "sample description", "sample url"),
+                1L
         );
 
         assertThatThrownBy(() -> reservation.changeDateAndTime(LocalDate.now(), null))

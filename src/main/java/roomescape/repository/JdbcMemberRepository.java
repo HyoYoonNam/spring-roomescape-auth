@@ -31,21 +31,28 @@ public class JdbcMemberRepository implements MemberRepository {
                 generatedKey,
                 member.getLoginId(),
                 member.getName(),
-                member.getPassword()
+                member.getPassword(),
+                member.getRole()
         );
     }
 
     @Override
     public Optional<Member> findById(Long id) {
         String sql = """
-                SELECT id, login_id, name, password
+                SELECT id, login_id, name, password, role
                 FROM member
                 WHERE id = ?
                 """;
 
         return jdbcTemplate.query(
                         sql,
-                        getMemberRowMapper(),
+                        (rs, rowNum) -> new Member(
+                                rs.getLong("id"),
+                                rs.getString("login_id"),
+                                rs.getString("name"),
+                                rs.getString("password"),
+                                Member.Role.valueOf(rs.getString("role"))
+                        ),
                         id
                 )
                 .stream()
@@ -55,14 +62,20 @@ public class JdbcMemberRepository implements MemberRepository {
     @Override
     public Optional<Member> findByLoginId(String loginId) {
         String sql = """
-                SELECT id, login_id, name, password
+                SELECT id, login_id, name, password, role
                 FROM member
                 WHERE login_id = ?
                 """;
 
         return jdbcTemplate.query(
                         sql,
-                        getMemberRowMapper(),
+                        (rs, rowNum) -> new Member(
+                                rs.getLong("id"),
+                                rs.getString("login_id"),
+                                rs.getString("name"),
+                                rs.getString("password"),
+                                Member.Role.valueOf(rs.getString("role"))
+                        ),
                         loginId
                 )
                 .stream()
@@ -73,9 +86,5 @@ public class JdbcMemberRepository implements MemberRepository {
     public void deleteById(Long id) {
         String sql = "DELETE FROM member WHERE id = ?";
         jdbcTemplate.update(sql, id);
-    }
-
-    private static DataClassRowMapper<Member> getMemberRowMapper() {
-        return new DataClassRowMapper<>(Member.class);
     }
 }

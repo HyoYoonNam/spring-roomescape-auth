@@ -28,7 +28,7 @@ class JdbcMemberRepositoryTest {
     @DisplayName("회원을 저장한다")
     @Test
     void id가_없는_회원을_전달하면_id가_부여된_회원을_리턴한다() {
-        Member member = Member.withoutId("myId", "rudevico", "myPassword");
+        Member member = Member.withoutId("myId", "rudevico", "myPassword", Member.Role.USER);
         Member saved = jdbcMemberRepository.save(member);
 
         assertThat(saved.getId()).isNotNull();
@@ -42,8 +42,8 @@ class JdbcMemberRepositoryTest {
     @Test
     void 회원을_id로_조회한다() {
         // given
-        insertSampleMember(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD);
-        Member expectedMember = new Member(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD);
+        insertSampleMember(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD, Member.Role.USER);
+        Member expectedMember = new Member(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD, Member.Role.USER);
 
         // when
         Optional<Member> found = jdbcMemberRepository.findById(1L);
@@ -61,8 +61,8 @@ class JdbcMemberRepositoryTest {
     @Test
     void 회원을_로그인_id로_조회한다() {
         // given
-        insertSampleMember(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD);
-        Member expectedMember = new Member(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD);
+        insertSampleMember(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD, Member.Role.USER);
+        Member expectedMember = new Member(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD, Member.Role.USER);
 
         // when
         Optional<Member> found = jdbcMemberRepository.findByLoginId("myId");
@@ -79,7 +79,7 @@ class JdbcMemberRepositoryTest {
     @DisplayName("회원을 id로 삭제한다")
     @Test
     void 회원을_id로_삭제한다() {
-        insertSampleMember(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD);
+        insertSampleMember(SAMPLE_ID, SAMPLE_LOGIN_ID, SAMPLE_NAME, SAMPLE_PASSWORD, Member.Role.USER);
 
         jdbcMemberRepository.deleteById(1L);
 
@@ -87,13 +87,13 @@ class JdbcMemberRepositoryTest {
         assertThat(count).isZero();
     }
 
-    private void insertSampleMember(Long id, String sampleLoginId, String sampleName, String samplePassword) {
+    private void insertSampleMember(Long id, String sampleLoginId, String sampleName, String samplePassword, Member.Role role) {
         String sql = """
-                INSERT INTO member (id, login_id, name, password)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO member (id, login_id, name, password, role)
+                VALUES (?, ?, ?, ?, ?)
                 """;
         jdbcTemplate.update(sql,
-                id, sampleLoginId, sampleName, samplePassword
+                id, sampleLoginId, sampleName, samplePassword, role.name()
         );
     }
 }
