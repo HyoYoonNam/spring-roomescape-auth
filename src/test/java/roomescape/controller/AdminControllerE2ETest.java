@@ -197,8 +197,7 @@ class AdminControllerE2ETest {
             Map<String, Object> requestBody = Map.of(
                     "name", "귀신찾기",
                     "description", "귀신을 찾는 테마입니다.",
-                    "imageUrl", "https://image.png",
-                    "storeId", 1
+                    "imageUrl", "https://image.png"
             );
 
             RestAssured.given().log().all()
@@ -227,9 +226,9 @@ class AdminControllerE2ETest {
 
         private static Stream<Arguments> provideInvalidThemeRequests() {
             return Stream.of(
-                    Arguments.of("이름 누락", Map.of("description", "설명", "imageUrl", "https://image.png", "storeId", "1")),
-                    Arguments.of("설명 누락", Map.of("name", "이름", "imageUrl", "https://image.png", "storeId", "1")),
-                    Arguments.of("이미지 누락", Map.of("name", "이름", "description", "설명", "storeId", "1"))
+                    Arguments.of("이름 누락", Map.of("description", "설명", "imageUrl", "https://image.png")),
+                    Arguments.of("설명 누락", Map.of("name", "이름", "imageUrl", "https://image.png")),
+                    Arguments.of("이미지 누락", Map.of("name", "이름", "description", "설명"))
             );
         }
 

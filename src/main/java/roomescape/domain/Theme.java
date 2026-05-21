@@ -73,11 +73,5 @@ public class Theme {
             throw new IllegalArgumentException("테마 이미지는 필수입니다.");
         }
     }
-
-    private void validateStoreId(Long storeId) {
-        if (storeId == null) {
-            throw new IllegalArgumentException("매장 ID는 필수입니다.");
-        }
-    }
 }
 
