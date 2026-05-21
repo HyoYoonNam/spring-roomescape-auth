@@ -51,10 +51,6 @@ public class ReservationService {
     }
 
     public List<ReservationResponseDto> readAllReservation(LoginMember loginMember) {
-        if (!loginMember.isManager()) {
-            throw new roomescape.exception.ForbiddenException("매니저만 전체 예약을 조회할 수 있습니다.");
-        }
-
         List<Long> managedStoreIds = storeRepository.findStoreIdsByManagerId(loginMember.id());
 
         return reservationRepository.findAll()

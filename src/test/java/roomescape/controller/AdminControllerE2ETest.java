@@ -20,6 +20,7 @@ import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql("/data.sql")
 class AdminControllerE2ETest {
 
     private String getAdminToken() {
@@ -28,14 +29,14 @@ class AdminControllerE2ETest {
                 .contentType(ContentType.JSON)
                 .body(Map.of("loginId", "admin@roomescape.com", "password", "adminPassword"))
                 .when().post("/login")
-                .then().extract().path("accessToken");
+                .then().log().ifValidationFails()
+                .extract().path("accessToken");
     }
 
     @Nested
     class 예약_조회_케이스 {
 
         @DisplayName("모든 예약을 조회한다")
-        @Sql("/data.sql")
         @Test
         void 모든_예약을_조회한다() {
             RestAssured.given().log().all()
@@ -43,11 +44,10 @@ class AdminControllerE2ETest {
                     .when().get("/admin/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(25)); // data.sql의 전체 예약 개수 (어드민은 모든 매장 관리하므로 다 보임)
+                    .body("size()", is(25)); // data.sql의 전체 예약 개수
         }
 
         @DisplayName("예약 ID로 상세 정보를 조회한다")
-        @Sql("/data.sql")
         @Test
         void 예약_ID로_상세_정보를_조회한다() {
             RestAssured.given().log().all()
@@ -60,7 +60,6 @@ class AdminControllerE2ETest {
         }
 
         @DisplayName("존재하지 않는 예약 ID 조회 시 422 Unprocessable Entity를 응답한다")
-        @Sql("/data.sql")
         @Test
         void 존재하지_않는_예약_ID_조회_시_422를_응답한다() {
             RestAssured.given().log().all()
@@ -71,7 +70,6 @@ class AdminControllerE2ETest {
         }
 
         @DisplayName("잘못된 형식의 예약 ID 조회 시 400 Bad Request를 응답한다")
-        @Sql("/data.sql")
         @Test
         void 잘못된_형식의_예약_ID_조회_시_400을_응답한다() {
             RestAssured.given().log().all()
@@ -87,6 +85,7 @@ class AdminControllerE2ETest {
     class 예약_시간_생성_삭제_케이스 {
 
         @DisplayName("예약 시간을 생성한다")
+        @Sql("/store.sql")
         @Test
         void 예약_시간_생성에_성공하면_201_Created를_응답한다() {
             Map<String, String> requestBody = Map.of(
@@ -144,6 +143,7 @@ class AdminControllerE2ETest {
         }
 
         @DisplayName("존재하지 않는 예약 시간 삭제 요청 시 422 Unprocessable Entity를 응답한다")
+        @Sql("/store.sql")
         @Test
         void 삭제하려는_예약_시간이_존재하지_않는다면_422를_응답한다() {
             RestAssured.given().log().all()
@@ -251,7 +251,7 @@ class AdminControllerE2ETest {
             RestAssured.given().log().all()
                     .header("Authorization", "Bearer " + getAdminToken())
                     .contentType(ContentType.JSON)
-                    .when().delete("/admin/themes/1")
+                    .when().delete("/admin/themes/" + Long.MAX_VALUE)
                     .then().log().all()
                     .statusCode(422);
         }

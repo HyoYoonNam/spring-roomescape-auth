@@ -28,11 +28,15 @@ class GlobalExceptionHandlerTest {
     private LoginInterceptor loginInterceptor;
 
     @MockitoBean
+    private roomescape.infreastructure.AdminInterceptor adminInterceptor;
+
+    @MockitoBean
     private roomescape.infreastructure.LoginMemberArgumentResolver loginMemberArgumentResolver;
 
     @org.junit.jupiter.api.BeforeEach
     void setUp() throws Exception {
         when(loginInterceptor.preHandle(any(), any(), any())).thenReturn(true);
+        when(adminInterceptor.preHandle(any(), any(), any())).thenReturn(true);
     }
 
     @DisplayName("IllegalArgumentException이 발생하면 400 Bad Request로 변환하여 응답한다")

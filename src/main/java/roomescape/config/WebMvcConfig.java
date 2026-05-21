@@ -10,6 +10,7 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import roomescape.infreastructure.AdminInterceptor;
 import roomescape.infreastructure.AuthTokenReturnValueHandler;
 import roomescape.infreastructure.ClientTypeInterceptor;
 import roomescape.infreastructure.LoginInterceptor;
@@ -19,15 +20,18 @@ import roomescape.infreastructure.LoginMemberArgumentResolver;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final LoginInterceptor loginInterceptor;
+    private final AdminInterceptor adminInterceptor;
     private final LoginMemberArgumentResolver loginMemberArgumentResolver;
     private final ClientTypeInterceptor clientTypeInterceptor;
 
     public WebMvcConfig(
             LoginInterceptor loginInterceptor,
+            AdminInterceptor adminInterceptor,
             LoginMemberArgumentResolver loginMemberArgumentResolver,
             ClientTypeInterceptor clientTypeInterceptor
     ) {
         this.loginInterceptor = loginInterceptor;
+        this.adminInterceptor = adminInterceptor;
         this.loginMemberArgumentResolver = loginMemberArgumentResolver;
         this.clientTypeInterceptor = clientTypeInterceptor;
     }
@@ -38,6 +42,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**");
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/api/reservations/**", "/members/me");
+        registry.addInterceptor(adminInterceptor)
+                .addPathPatterns("/admin/**");
     }
 
     @Override
