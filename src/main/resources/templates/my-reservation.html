@@ -229,7 +229,7 @@
           <td>${res.time.startAt}</td>
           <td>
             <button class="edit-btn" onclick="openEditModal(${res.id}, '${res.theme.name}', '${res.date}', ${res.time.id})">수정</button>
-            <button class="cancel-btn" onclick="cancelReservation('${res.date}', ${res.time.id}, ${res.theme.id})">취소</button>
+            <button class="cancel-btn" onclick="cancelReservation('${res.date}', ${res.time.id}, ${res.theme.id}, ${res.storeId})">취소</button>
           </td>
         `;
         list.appendChild(tr);
@@ -238,13 +238,14 @@
     .catch(err => console.error(err));
   }
 
-  function cancelReservation(date, timeId, themeId) {
+  function cancelReservation(date, timeId, themeId, storeId) {
     if (!confirm('정말 취소하시겠습니까?')) return;
 
     const params = new URLSearchParams({
       date: date,
       timeId: timeId,
-      themeId: themeId
+      themeId: themeId,
+      storeId: storeId
     });
 
     fetch(`/api/reservations?${params.toString()}`, {
