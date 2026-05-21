@@ -51,6 +51,6 @@ public class LoginController {
     public ResponseEntity<MemberResponse> findMe(@Login LoginMember loginMember) {
         return ResponseEntity
                 .ok()
-                .body(MemberResponse.from(loginMember));
+                .body(MemberResponse.from(authService.findMemberById(loginMember.id())));
     }
 }

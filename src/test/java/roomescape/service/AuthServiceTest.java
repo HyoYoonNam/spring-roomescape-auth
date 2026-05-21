@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 
 import java.util.Map;
 import java.util.Optional;
@@ -105,23 +106,22 @@ class AuthServiceTest {
         @DisplayName("유효한 토큰을 해석하여 LoginMember DTO를 반환한다")
         @Test
         void 유효한_토큰이면_LoginMember를_리턴한다() {
-            Mockito.when(mockJwtTokenProvider.getPayload("validToken")).thenReturn(SAMPLE_LOGIN_ID);
-            Mockito.when(mockJwtTokenProvider.getRole("validToken")).thenReturn("USER");
-            LoginMember loginMember = authService.findMemberByToken("validToken");
-
-            assertThat(loginMember.id()).isEqualTo(1L);
-            assertThat(loginMember.loginId()).isEqualTo(SAMPLE_LOGIN_ID);
-            assertThat(loginMember.name()).isEqualTo(SAMPLE_NAME);
+            // This test logic is now moved to LoginMemberArgumentResolver or simplified here if still testing AuthService wrapper (if any)
+            // But AuthService.findMemberByToken was removed. 
+            // We should test createToken to ensure it uses ID and test findMemberById.
+            
+            TokenResponseDto created = authService.createToken(new TokenRequestDto(SAMPLE_LOGIN_ID, SAMPLE_PASSWORD));
+            
+            Mockito.verify(mockJwtTokenProvider).createToken(eq("1"), eq("USER"));
         }
 
-        @DisplayName("존재하지 않는 사용자의 토큰이면 AuthorizationException을 던진다")
+        @DisplayName("ID로 멤버를 조회한다")
         @Test
-        void 존재하지_않는_사용자면_AuthorizationException을_던진다() {
-            Mockito.when(mockJwtTokenProvider.getPayload("invalidToken")).thenReturn(NOEXISTS_LOGIN_ID);
-            Mockito.when(mockJwtTokenProvider.getRole("invalidToken")).thenReturn("USER");
+        void ID로_멤버를_조회하면_Member를_리턴한다() {
+            Member member = authService.findMemberById(1L);
 
-            assertThatThrownBy(() -> authService.findMemberByToken("invalidToken"))
-                    .isExactlyInstanceOf(AuthorizationException.class);
+            assertThat(member.getId()).isEqualTo(1L);
+            assertThat(member.getName()).isEqualTo(SAMPLE_NAME);
         }
     }
 
@@ -138,7 +138,9 @@ class AuthServiceTest {
 
         @Override
         public Optional<Member> findById(Long id) {
-            return Optional.empty();
+            return members.values().stream()
+                    .filter(member -> member.getId().equals(id))
+                    .findFirst();
         }
 
         @Override

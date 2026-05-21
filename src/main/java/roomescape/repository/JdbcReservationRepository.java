@@ -67,7 +67,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 INNER JOIN theme AS th
                 ON r.theme_id = th.id
             """;
-    private static final String FIND_ALL_RESERVATIONS_BY_USERNAME = """
+    private static final String FIND_ALL_RESERVATIONS_BY_MEMBER_ID = """
                 SELECT r.id AS reservation_id,
                 m.id AS member_id, m.login_id, m.name AS member_name, m.password, m.role,
                 r.date,
@@ -89,32 +89,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 INNER JOIN theme AS th
                 ON r.theme_id = th.id
             
-                WHERE m.name = ?
-            """;
-
-    private static final String FIND_ALL_RESERVATIONS_BY_LOGIN_ID = """
-                SELECT r.id AS reservation_id,
-                m.id AS member_id, m.login_id, m.name AS member_name, m.password, m.role,
-                r.date,
-                r.store_id,
-                t.id AS reservation_time_id,
-                t.start_at AS time_value,
-                th.id AS reservation_theme_id,
-                th.name AS reservation_theme_name,
-                th.description AS reservation_theme_description,
-                th.image_url AS reservation_theme_image_url
-            
-                FROM reservation AS r
-                INNER JOIN member AS m
-                ON r.member_id = m.id
-
-                INNER JOIN reservation_time AS t
-                ON r.time_id = t.id
-            
-                INNER JOIN theme AS th
-                ON r.theme_id = th.id
-            
-                WHERE m.login_id = ?
+                WHERE m.id = ?
             """;
 
     private final JdbcTemplate jdbcTemplate;
@@ -159,20 +134,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByUsername(String username) {
+    public List<Reservation> findAllByMemberId(Long memberId) {
         return jdbcTemplate.query(
-                FIND_ALL_RESERVATIONS_BY_USERNAME,
+                FIND_ALL_RESERVATIONS_BY_MEMBER_ID,
                 getReservationRowMapper(),
-                username
-        );
-    }
-
-    @Override
-    public List<Reservation> findAllByLoginId(String loginId) {
-        return jdbcTemplate.query(
-                FIND_ALL_RESERVATIONS_BY_LOGIN_ID,
-                getReservationRowMapper(),
-                loginId
+                memberId
         );
     }
 

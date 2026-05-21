@@ -46,7 +46,7 @@ class ReservationServiceTest {
 
     private LoginMember getLoginMember() {
         Member member = memberRepository.findById(1L).orElseThrow();
-        return new LoginMember(member.getId(), member.getName(), member.getLoginId(), Member.Role.USER);
+        return new LoginMember(member.getId(), Member.Role.USER);
     }
 
     @DisplayName("예약을 생성한다")
@@ -111,7 +111,7 @@ class ReservationServiceTest {
                 echoReservationRequestDTO);
 
         // when
-        LoginMember manager = new LoginMember(2L, "admin", "admin", Member.Role.MANAGER);
+        LoginMember manager = new LoginMember(2L, Member.Role.MANAGER);
         List<ReservationResponseDto> allReservations = reservationService.readAllReservation(manager);
 
         // then

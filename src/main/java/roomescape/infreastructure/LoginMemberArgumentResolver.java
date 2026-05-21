@@ -10,18 +10,18 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.annotation.Login;
+import roomescape.domain.Member;
 import roomescape.dto.LoginMember;
-import roomescape.service.AuthService;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthorizationExtractor<String> authorizationExtractor;
-    private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginMemberArgumentResolver(AuthService authService) {
+    public LoginMemberArgumentResolver(JwtTokenProvider jwtTokenProvider) {
         this.authorizationExtractor = new BearerAuthorizationExtractor();
-        this.authService = authService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -52,6 +52,10 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             token = authorizationExtractor.extract(request);
         }
 
-        return authService.findMemberByToken(token);
+        jwtTokenProvider.validateToken(token);
+        Long id = Long.parseLong(jwtTokenProvider.getPayload(token));
+        Member.Role role = Member.Role.valueOf(jwtTokenProvider.getRole(token));
+
+        return new LoginMember(id, role);
     }
 }

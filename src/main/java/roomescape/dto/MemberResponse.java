@@ -8,8 +8,4 @@ public record MemberResponse(
     public static MemberResponse from(Member member) {
         return new MemberResponse(member.getName());
     }
-
-    public static MemberResponse from(LoginMember loginMember) {
-        return new MemberResponse(loginMember.name());
-    }
 }

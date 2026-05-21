@@ -61,7 +61,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponseDto> findAllByMember(LoginMember loginMember) {
-        return reservationRepository.findAllByLoginId(loginMember.loginId())
+        return reservationRepository.findAllByMemberId(loginMember.id())
                 .stream()
                 .map(ReservationResponseDto::from)
                 .toList();

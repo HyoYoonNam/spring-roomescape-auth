@@ -11,9 +11,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllByUsername(String username);
-
-    List<Reservation> findAllByLoginId(String loginId);
+    List<Reservation> findAllByMemberId(Long memberId);
 
     Optional<Reservation> findById(Long id);
 

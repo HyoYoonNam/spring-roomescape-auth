@@ -120,7 +120,7 @@ class JdbcReservationRepositoryTest {
 
     @DisplayName("특정 사용자에 대한 모든 예약을 조회한다")
     @Test
-    void 사용자_이름을_조건으로_모든_예약을_조회한다() {
+    void 사용자_ID를_조건으로_모든_예약을_조회한다() {
         // given
         Member member1 = memberRepository.save(
                 Member.withoutId("sample1@sample.com", "루드비코", "samplePassword", Member.Role.USER)
@@ -147,7 +147,7 @@ class JdbcReservationRepositoryTest {
         Reservation savedCocoReservation = reservationRepository.save(cocoReservation);
 
         // when
-        List<Reservation> foundReservations = reservationRepository.findAllByUsername("루드비코");
+        List<Reservation> foundReservations = reservationRepository.findAllByMemberId(member1.getId());
 
         // then
         assertThat(foundReservations)
