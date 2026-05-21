@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.Login;
 import roomescape.dto.LoginMember;
 import roomescape.dto.ReservationResponseDto;
-import roomescape.dto.ReservationTimeRequestDTO;
-import roomescape.dto.ReservationTimeResponseDTO;
-import roomescape.dto.ThemeRequestDTO;
-import roomescape.dto.ThemeResponseDTO;
+import roomescape.dto.ReservationTimeRequestDto;
+import roomescape.dto.ReservationTimeResponseDto;
+import roomescape.dto.ThemeRequestDto;
+import roomescape.dto.ThemeResponseDto;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
@@ -51,8 +51,8 @@ public class AdminController {
     }
 
     @PostMapping("/times")
-    public ResponseEntity<ReservationTimeResponseDTO> add(@Valid @RequestBody ReservationTimeRequestDTO request) {
-        ReservationTimeResponseDTO saved = reservationTimeService.addReservationTime(request);
+    public ResponseEntity<ReservationTimeResponseDto> add(@Valid @RequestBody ReservationTimeRequestDto request) {
+        ReservationTimeResponseDto saved = reservationTimeService.addReservationTime(request);
         return ResponseEntity.created(URI.create("/times/" + saved.id())).build();
     }
 
@@ -65,8 +65,8 @@ public class AdminController {
     }
 
     @PostMapping("/themes")
-    public ResponseEntity<ThemeResponseDTO> add(@Valid @RequestBody ThemeRequestDTO request) {
-        ThemeResponseDTO saved = themeService.addTheme(request);
+    public ResponseEntity<ThemeResponseDto> add(@Valid @RequestBody ThemeRequestDto request) {
+        ThemeResponseDto saved = themeService.addTheme(request);
         return ResponseEntity.created(URI.create("/themes/" + saved.id())).build();
     }
 

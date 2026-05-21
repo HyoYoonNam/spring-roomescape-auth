@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import roomescape.dto.ThemeRequestDTO;
-import roomescape.dto.ThemeResponseDTO;
+import roomescape.dto.ThemeRequestDto;
+import roomescape.dto.ThemeResponseDto;
 import roomescape.exception.ThemeInUseException;
 import roomescape.repository.JdbcReservationRepository;
 import roomescape.repository.JdbcThemeRepository;
@@ -32,9 +32,9 @@ class ThemeServiceTest {
     @DisplayName("테마를 생성한다")
     @Test
     void ThemeRequestDTO를_받아_ThemeResponseDTO를_리턴한다() {
-        ThemeRequestDTO themeRequestDTO = new ThemeRequestDTO("sample theme", "샘플 테마입니다", "example.com");
+        ThemeRequestDto themeRequestDTO = new ThemeRequestDto("sample theme", "샘플 테마입니다", "example.com");
 
-        ThemeResponseDTO addedTheme = themeService.addTheme(themeRequestDTO);
+        ThemeResponseDto addedTheme = themeService.addTheme(themeRequestDTO);
 
         assertThat(addedTheme)
                 .usingRecursiveComparison()
@@ -50,7 +50,7 @@ class ThemeServiceTest {
             "이미지 누락, 이름, 설명, "
     })
     void 불완전한_정보로_테마_생성_요청_시_예외를_던진다(String description, String name, String themeDesc, String imageUrl) {
-        ThemeRequestDTO invalidRequest = new ThemeRequestDTO(name, themeDesc, imageUrl);
+        ThemeRequestDto invalidRequest = new ThemeRequestDto(name, themeDesc, imageUrl);
 
         assertThatThrownBy(() -> themeService.addTheme(invalidRequest))
                 .isExactlyInstanceOf(IllegalArgumentException.class);
@@ -60,17 +60,17 @@ class ThemeServiceTest {
     @Test
     void 존재하는_모든_테마의_ThemeResponseDTO가_담긴_리스트를_리턴한다() {
         // given
-        ThemeResponseDTO addedSampleATheme = themeService.addTheme(
-                new ThemeRequestDTO("sample theme", "샘플 테마입니다", "example.com")
+        ThemeResponseDto addedSampleATheme = themeService.addTheme(
+                new ThemeRequestDto("sample theme", "샘플 테마입니다", "example.com")
 
         );
-        ThemeResponseDTO addedSampleBTheme = themeService.addTheme(
-                new ThemeRequestDTO("sample theme", "샘플 테마입니다", "example.com")
+        ThemeResponseDto addedSampleBTheme = themeService.addTheme(
+                new ThemeRequestDto("sample theme", "샘플 테마입니다", "example.com")
 
         );
 
         // when
-        List<ThemeResponseDTO> allThemes = themeService.findAllThemes();
+        List<ThemeResponseDto> allThemes = themeService.findAllThemes();
 
         // then
         assertThat(allThemes)
@@ -81,12 +81,12 @@ class ThemeServiceTest {
     @DisplayName("특정 테마를 조회한다")
     @Test
     void 테마의_id로_테마를_조회한다() {
-        ThemeResponseDTO addedTheme = themeService.addTheme(
-                new ThemeRequestDTO("sample theme", "샘플 테마입니다", "example.com")
+        ThemeResponseDto addedTheme = themeService.addTheme(
+                new ThemeRequestDto("sample theme", "샘플 테마입니다", "example.com")
 
         );
 
-        ThemeResponseDTO foundTheme = themeService.findById(addedTheme.id());
+        ThemeResponseDto foundTheme = themeService.findById(addedTheme.id());
 
         assertThat(foundTheme).isEqualTo(addedTheme);
     }
@@ -95,12 +95,12 @@ class ThemeServiceTest {
     @Sql("/data.sql")
     @Test
     void 인기_테마를_조회한다() {
-        List<ThemeResponseDTO> foundPopularThemes = themeService.findPopularThemes();
+        List<ThemeResponseDto> foundPopularThemes = themeService.findPopularThemes();
 
         assertThat(foundPopularThemes)
                 .as("인기 테마는 상위 10개 항목을 리턴해야 합니다")
                 .hasSize(10)
-                .map(ThemeResponseDTO::id)
+                .map(ThemeResponseDto::id)
                 .as("포함되어야 할 인기 테마가 없거나, 순서가 잘못되었습니다")
                 .containsExactlyInAnyOrder(1L, 2L, 3L, 6L, 5L, 4L, 8L, 7L, 10L, 9L);
     }
@@ -108,8 +108,8 @@ class ThemeServiceTest {
     @DisplayName("테마를 삭제한다")
     @Test
     void 테마의_id로_테마를_삭제한다() {
-        ThemeResponseDTO addedTheme = themeService.addTheme(
-                new ThemeRequestDTO("sample theme", "샘플 테마입니다", "example.com")
+        ThemeResponseDto addedTheme = themeService.addTheme(
+                new ThemeRequestDto("sample theme", "샘플 테마입니다", "example.com")
 
         );
 

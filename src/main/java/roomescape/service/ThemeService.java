@@ -4,8 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
-import roomescape.dto.ThemeRequestDTO;
-import roomescape.dto.ThemeResponseDTO;
+import roomescape.dto.ThemeRequestDto;
+import roomescape.dto.ThemeResponseDto;
 import roomescape.exception.ThemeInUseException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationRepository;
@@ -23,30 +23,30 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ThemeResponseDTO addTheme(ThemeRequestDTO request) {
+    public ThemeResponseDto addTheme(ThemeRequestDto request) {
         Theme theme =
                 Theme.withoutId(request.name(), request.description(), request.imageUrl());
         Theme savedTheme = themeRepository.save(theme);
-        return ThemeResponseDTO.from(savedTheme);
+        return ThemeResponseDto.from(savedTheme);
     }
 
-    public List<ThemeResponseDTO> findAllThemes() {
+    public List<ThemeResponseDto> findAllThemes() {
         return themeRepository.findAll()
                 .stream()
-                .map(ThemeResponseDTO::from)
+                .map(ThemeResponseDto::from)
                 .toList();
     }
 
-    public ThemeResponseDTO findById(Long id) {
+    public ThemeResponseDto findById(Long id) {
         Theme result = themeRepository.findById(id)
                 .orElseThrow(() -> new ThemeNotFoundException("ID로 테마 조회 실패: " + id));
-        return ThemeResponseDTO.from(result);
+        return ThemeResponseDto.from(result);
     }
 
-    public List<ThemeResponseDTO> findPopularThemes() {
+    public List<ThemeResponseDto> findPopularThemes() {
         return themeRepository.findPopularThemes()
                 .stream()
-                .map(ThemeResponseDTO::from)
+                .map(ThemeResponseDto::from)
                 .toList();
     }
 

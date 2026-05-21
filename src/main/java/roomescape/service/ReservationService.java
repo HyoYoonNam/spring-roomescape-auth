@@ -10,7 +10,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.LoginMember;
-import roomescape.dto.ReservationRequestDTO;
+import roomescape.dto.ReservationRequestDto;
 import roomescape.dto.ReservationResponseDto;
 import roomescape.dto.ReservationUpdateDtoDateAndTimeIdOnly;
 import roomescape.exception.DuplicatedReservationException;
@@ -76,7 +76,7 @@ public class ReservationService {
         return ReservationResponseDto.from(reservation);
     }
 
-    public ReservationResponseDto reserve(LoginMember loginMember, ReservationRequestDTO reservationRequestDTO) {
+    public ReservationResponseDto reserve(LoginMember loginMember, ReservationRequestDto reservationRequestDTO) {
         Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new roomescape.exception.AuthorizationException());
 
@@ -119,7 +119,7 @@ public class ReservationService {
         return reservationRepository.update(reservation);
     }
 
-    public void cancelReservation(LoginMember loginMember, ReservationRequestDTO requestDTO) {
+    public void cancelReservation(LoginMember loginMember, ReservationRequestDto requestDTO) {
         ReservationTime time = reservationTimeRepository.findById(requestDTO.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException("취소 대상을 위한 시간 조회 실패: " + requestDTO.timeId()));
 

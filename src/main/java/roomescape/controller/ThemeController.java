@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.dto.ThemeResponseDTO;
+import roomescape.dto.ThemeResponseDto;
 import roomescape.service.ThemeService;
 
 @RestController
@@ -20,18 +20,18 @@ public class ThemeController {
     }
 
     @GetMapping
-    public List<ThemeResponseDTO> readThemes() {
+    public List<ThemeResponseDto> readThemes() {
         return themeService.findAllThemes();
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<List<ThemeResponseDTO>> readPopularThemes() {
-        List<ThemeResponseDTO> popularThemes = themeService.findPopularThemes();
+    public ResponseEntity<List<ThemeResponseDto>> readPopularThemes() {
+        List<ThemeResponseDto> popularThemes = themeService.findPopularThemes();
         return ResponseEntity.ok(popularThemes);
     }
 
     @GetMapping("/{id}")
-    public ThemeResponseDTO findById(@PathVariable Long id) {
+    public ThemeResponseDto findById(@PathVariable Long id) {
         return themeService.findById(id);
     }
 }

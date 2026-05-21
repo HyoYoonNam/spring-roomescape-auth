@@ -7,8 +7,8 @@ public record ReservationResponseDto(
         Long id,
         String name,
         LocalDate date,
-        ReservationTimeResponseDTO time,
-        ThemeResponseDTO theme,
+        ReservationTimeResponseDto time,
+        ThemeResponseDto theme,
         Long storeId
 ) {
     public static ReservationResponseDto from(Reservation reservation) {
@@ -16,8 +16,8 @@ public record ReservationResponseDto(
                 reservation.getId(),
                 reservation.getName(),
                 reservation.getDate(),
-                ReservationTimeResponseDTO.from(reservation.getTime()),
-                ThemeResponseDTO.from(reservation.getTheme()),
+                ReservationTimeResponseDto.from(reservation.getTime()),
+                ThemeResponseDto.from(reservation.getTheme()),
                 reservation.getStoreId()
         );
     }

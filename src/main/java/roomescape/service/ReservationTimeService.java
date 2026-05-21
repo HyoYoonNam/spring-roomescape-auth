@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.ReservationTimeRequestDTO;
-import roomescape.dto.ReservationTimeResponseDTO;
+import roomescape.dto.ReservationTimeRequestDto;
+import roomescape.dto.ReservationTimeResponseDto;
 import roomescape.exception.ReservationTimeInUseException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.repository.ReservationRepository;
@@ -27,23 +27,23 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ReservationTimeResponseDTO addReservationTime(ReservationTimeRequestDTO reservationTimeRequest) {
+    public ReservationTimeResponseDto addReservationTime(ReservationTimeRequestDto reservationTimeRequest) {
         ReservationTime reservationTime = ReservationTime.withoutId(reservationTimeRequest.startAt());
 
         ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
-        return ReservationTimeResponseDTO.from(savedTime);
+        return ReservationTimeResponseDto.from(savedTime);
     }
 
-    public List<ReservationTimeResponseDTO> findAllReservationTime() {
+    public List<ReservationTimeResponseDto> findAllReservationTime() {
         return reservationTimeRepository.findAll().stream()
-                .map(ReservationTimeResponseDTO::from)
+                .map(ReservationTimeResponseDto::from)
                 .toList();
     }
 
-    public List<ReservationTimeResponseDTO> findReservedTimes(LocalDate selectedDate, Long themeId) {
+    public List<ReservationTimeResponseDto> findReservedTimes(LocalDate selectedDate, Long themeId) {
         return reservationTimeRepository.findReservedTimes(selectedDate, themeId)
                 .stream()
-                .map(ReservationTimeResponseDTO::from)
+                .map(ReservationTimeResponseDto::from)
                 .toList();
     }
 

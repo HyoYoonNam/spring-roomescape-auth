@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.annotation.Login;
 import roomescape.dto.LoginMember;
-import roomescape.dto.ReservationRequestDTO;
+import roomescape.dto.ReservationRequestDto;
 import roomescape.dto.ReservationResponseDto;
 import roomescape.dto.ReservationUpdateDtoDateAndTimeIdOnly;
 import roomescape.service.ReservationService;
@@ -39,7 +39,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<Void> add(
             @Login LoginMember loginMember,
-            @Valid @RequestBody ReservationRequestDTO reservationRequest
+            @Valid @RequestBody ReservationRequestDto reservationRequest
     ) {
         ReservationResponseDto saved = reservationService.reserve(loginMember, reservationRequest);
         return ResponseEntity
@@ -62,7 +62,7 @@ public class ReservationController {
     @DeleteMapping
     public ResponseEntity<Void> delete(
             @Login LoginMember loginMember,
-            @Valid @ModelAttribute ReservationRequestDTO reservationRequest
+            @Valid @ModelAttribute ReservationRequestDto reservationRequest
     ) {
         reservationService.cancelReservation(loginMember, reservationRequest);
         return ResponseEntity
