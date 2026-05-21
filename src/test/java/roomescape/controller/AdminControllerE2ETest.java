@@ -43,7 +43,7 @@ class AdminControllerE2ETest {
                     .when().get("/admin/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(24)); // data.sql의 전체 예약 개수 (어드민은 모든 매장 관리하므로 다 보임)
+                    .body("size()", is(25)); // data.sql의 전체 예약 개수 (어드민은 모든 매장 관리하므로 다 보임)
         }
 
         @DisplayName("예약 ID로 상세 정보를 조회한다")

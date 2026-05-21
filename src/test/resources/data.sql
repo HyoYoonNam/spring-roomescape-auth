@@ -75,4 +75,5 @@ VALUES
     (21, 4, DATEADD('DAY', -15, CURRENT_DATE), 1, 11, 2),
     (22, 4, CURRENT_DATE, 2, 11, 2),
     (23, 1, DATEADD('DAY', 1, CURRENT_DATE), 1, 2, 1),
-    (24, 1, DATEADD('DAY', 2, CURRENT_DATE), 1, 2, 1);
+    (24, 1, DATEADD('DAY', 2, CURRENT_DATE), 1, 2, 1),
+    (25, 1, DATEADD('DAY', 2, CURRENT_DATE), 1, 7, 2);
