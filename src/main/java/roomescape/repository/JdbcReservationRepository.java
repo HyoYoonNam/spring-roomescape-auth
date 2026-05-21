@@ -23,7 +23,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT
                     r.id AS reservation_id,
                     m.id AS member_id, m.login_id, m.name AS member_name, m.password, m.role,
-                    r.date, 
+                    r.date,
                     r.store_id,
                     t.id AS reservation_time_id,
                     t.start_at AS time_value,
@@ -57,7 +57,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 th.description AS reservation_theme_description,
                 th.image_url AS reservation_theme_image_url
             
-                FROM reservation AS r 
+                FROM reservation AS r
                 INNER JOIN member AS m
                 ON r.member_id = m.id
 

@@ -1,17 +1,11 @@
 package roomescape.config;
 
-import jakarta.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import roomescape.infreastructure.AdminInterceptor;
-import roomescape.infreastructure.AuthTokenReturnValueHandler;
 import roomescape.infreastructure.ClientTypeInterceptor;
 import roomescape.infreastructure.LoginInterceptor;
 import roomescape.infreastructure.LoginMemberArgumentResolver;

@@ -15,7 +15,6 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import roomescape.domain.Member;
-import roomescape.dto.LoginMember;
 import roomescape.dto.TokenRequestDto;
 import roomescape.dto.TokenResponseDto;
 import roomescape.exception.AuthorizationException;

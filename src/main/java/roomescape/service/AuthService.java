@@ -1,10 +1,7 @@
 package roomescape.service;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
-import roomescape.dto.LoginMember;
-import roomescape.dto.ReservationResponseDto;
 import roomescape.dto.TokenRequestDto;
 import roomescape.dto.TokenResponseDto;
 import roomescape.exception.AuthorizationException;
