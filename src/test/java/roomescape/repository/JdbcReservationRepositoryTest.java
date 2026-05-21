@@ -204,7 +204,8 @@ class JdbcReservationRepositoryTest {
                 member.getId(),
                 saved.getDate(),
                 saved.getTimeId(),
-                saved.getThemeId()
+                saved.getThemeId(),
+                saved.getStoreId()
         );
 
         // then

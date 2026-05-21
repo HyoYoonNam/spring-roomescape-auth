@@ -15,13 +15,13 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
-    Optional<Long> findReservationIdWith(LocalDate date, Long timeId, Long themeId);
+    Optional<Long> findReservationIdWith(LocalDate date, Long timeId, Long themeId, Long storeId);
 
     int update(Reservation reservation);
 
     void deleteById(Long id);
 
-    int deleteReservationWith(Long memberId, LocalDate date, Long timeId, Long themeId);
+    int deleteReservationWith(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId);
 
     boolean existsReservationByTimeId(Long timeId);
 

@@ -130,7 +130,8 @@ public class ReservationService {
         Long reservationId = reservationRepository.findReservationIdWith(
                         requestDTO.date(),
                         requestDTO.timeId(),
-                        requestDTO.themeId()
+                        requestDTO.themeId(),
+                        requestDTO.storeId()
                 )
                 .orElseThrow(() -> new ReservationNotFoundException("취소할 예약 정보를 찾을 수 없습니다."));
 
@@ -182,7 +183,8 @@ public class ReservationService {
         Optional<Long> found = reservationRepository.findReservationIdWith(
                 reservation.getDate(),
                 reservation.getTimeId(),
-                reservation.getThemeId()
+                reservation.getThemeId(),
+                reservation.getStoreId()
         );
 
         found.ifPresent(foundId -> {

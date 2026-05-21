@@ -154,19 +154,21 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Long> findReservationIdWith(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Long> findReservationIdWith(LocalDate date, Long timeId, Long themeId, Long storeId) {
         String sql = """
                 SELECT id
                 FROM reservation
                 WHERE date = :date
                 AND time_id = :timeId
                 AND theme_id = :themeId
+                AND store_id = :storeId
                 """;
 
         SqlParameterSource parameterSource = new MapSqlParameterSource()
                 .addValue("date", date)
                 .addValue("timeId", timeId)
-                .addValue("themeId", themeId);
+                .addValue("themeId", themeId)
+                .addValue("storeId", storeId);
         return namedParameterJdbcTemplate.query(
                         sql,
                         parameterSource,
@@ -206,7 +208,8 @@ public class JdbcReservationRepository implements ReservationRepository {
             Long memberId,
             LocalDate date,
             Long timeId,
-            Long themeId
+            Long themeId,
+            Long storeId
     ) {
         String sql = """
                 DELETE FROM reservation AS r
@@ -214,13 +217,15 @@ public class JdbcReservationRepository implements ReservationRepository {
                 AND r.date = :date
                 AND r.time_id = :timeId
                 AND r.theme_id = :themeId
+                AND r.store_id = :storeId
                 """;
 
         SqlParameterSource parameterSource = new MapSqlParameterSource()
                 .addValue("memberId", memberId)
                 .addValue("date", date)
                 .addValue("timeId", timeId)
-                .addValue("themeId", themeId);
+                .addValue("themeId", themeId)
+                .addValue("storeId", storeId);
         return namedParameterJdbcTemplate.update(
                 sql,
                 parameterSource
