@@ -66,8 +66,9 @@ class ReservationTimeServiceTest {
     @Test
     void 특정_테마의_특정_날짜의_예약된_시간을_조회한다() {
         List<ReservationTimeResponseDto> reservedTimes = reservationTimeService.findReservedTimes(
-                LocalDate.now(),
-                11L
+                LocalDate.now().minusDays(3),
+                1L,
+                1L
         );
 
         assertThat(reservedTimes).hasSize(1);

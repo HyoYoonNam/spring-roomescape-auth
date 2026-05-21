@@ -13,7 +13,7 @@ public interface ReservationTimeRepository {
 
     Optional<ReservationTime> findById(Long id);
 
-    List<ReservationTime> findReservedTimes(LocalDate selectedDate, Long themeId);
+    List<ReservationTime> findReservedTimes(LocalDate selectedDate, Long themeId, Long storeId);
 
     void delete(Long id);
 }

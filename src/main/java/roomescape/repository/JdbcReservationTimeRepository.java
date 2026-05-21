@@ -24,6 +24,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
               ON rt.id = re.time_id
               WHERE re.date = ?
               AND re.theme_id = ?
+              AND re.store_id = ?
             )
             """;
 
@@ -73,11 +74,11 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<ReservationTime> findReservedTimes(LocalDate selectedDate, Long themeId) {
+    public List<ReservationTime> findReservedTimes(LocalDate selectedDate, Long themeId, Long storeId) {
         return jdbcTemplate.query(
                 FIND_RESERVED_TIMES_BY_DATE_AND_THEME,
                 getReservationTimeRowMapper(),
-                selectedDate, themeId
+                selectedDate, themeId, storeId
         );
     }
 

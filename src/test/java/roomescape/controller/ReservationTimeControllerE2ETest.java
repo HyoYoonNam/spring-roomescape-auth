@@ -31,11 +31,11 @@ class ReservationTimeControllerE2ETest {
     @Sql("/data.sql")
     @Test
     void 테마와_날짜를_조건으로_예약된_시간대를_찾아_리턴한다() {
-        String requestParamFormat = "/times/reserved?themeId=%d&selectedDate=%s";
+        String requestParamFormat = "/times/reserved?themeId=%d&selectedDate=%s&storeId=%d";
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().get(requestParamFormat.formatted(3, LocalDate.now().minusDays(2)))
+                .when().get(requestParamFormat.formatted(3, LocalDate.now().minusDays(2), 1L))
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));

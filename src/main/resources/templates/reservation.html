@@ -145,6 +145,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const themeId = params.get('themeId');
+    const storeId = params.get('storeId') || 1;
     const datePicker = document.getElementById('date-picker');
 
     document.getElementById('error-close-btn').addEventListener('click', closeErrorModal);
@@ -168,7 +169,7 @@
       const selectedDate = datePicker.value;
       if (!selectedDate) return;
 
-      fetch(`/times/reserved?themeId=${themeId}&selectedDate=${selectedDate}`)
+      fetch(`/times/reserved?themeId=${themeId}&selectedDate=${selectedDate}&storeId=${storeId}`)
         .then(async res => {
           if (res.ok) {
             return res.json();
@@ -254,7 +255,7 @@
       fetch('/api/reservations', {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ themeId: parseInt(themeId), date, timeId: selectedTimeId })
+        body: JSON.stringify({ themeId: parseInt(themeId), date, timeId: selectedTimeId, storeId: parseInt(storeId) })
       })
       .then(async res => {
         if (res.status === 201) {

@@ -40,8 +40,8 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<ReservationTimeResponseDto> findReservedTimes(LocalDate selectedDate, Long themeId) {
-        return reservationTimeRepository.findReservedTimes(selectedDate, themeId)
+    public List<ReservationTimeResponseDto> findReservedTimes(LocalDate selectedDate, Long themeId, Long storeId) {
+        return reservationTimeRepository.findReservedTimes(selectedDate, themeId, storeId)
                 .stream()
                 .map(ReservationTimeResponseDto::from)
                 .toList();

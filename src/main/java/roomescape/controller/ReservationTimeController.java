@@ -29,9 +29,10 @@ public class ReservationTimeController {
     @GetMapping("/reserved")
     public ResponseEntity<List<ReservationTimeResponseDto>> readReservedTimesByThemeIdAndDate(
             @RequestParam Long themeId,
-            @RequestParam LocalDate selectedDate
+            @RequestParam LocalDate selectedDate,
+            @RequestParam Long storeId
     ) {
         return ResponseEntity
-                .ok(reservationTimeService.findReservedTimes(selectedDate, themeId));
+                .ok(reservationTimeService.findReservedTimes(selectedDate, themeId, storeId));
     }
 }
